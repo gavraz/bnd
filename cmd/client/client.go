@@ -1,24 +1,11 @@
 package main
 
 import (
+	"bnd/display"
 	"bnd/menu"
 	"fmt"
 	term "github.com/nsf/termbox-go"
 )
-
-func drawMenu(h *menu.Handler) {
-	current := h.CurrentChoice()
-	for i, item := range h.Choices() {
-		if i == current {
-			fmt.Print(">")
-		} else {
-			fmt.Print(" ")
-		}
-		fmt.Println(item)
-	}
-	fmt.Println()
-	fmt.Println()
-}
 
 func handleInput(menuHandler *menu.Handler) {
 	switch ev := term.PollEvent(); ev.Key {
@@ -44,10 +31,11 @@ func main() {
 	defer term.Close()
 
 	menuHandler := buildMenuHandler()
+	displayHandler := display.New(5)
 
 	for {
+		displayHandler.DrawMenu(menuHandler)
 		handleInput(menuHandler)
-		drawMenu(menuHandler)
 	}
 
 }

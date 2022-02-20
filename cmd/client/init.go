@@ -13,16 +13,15 @@ func buildMenuHandler() *menu.Handler {
 		WithOption("Character", func() {
 		}).Build()
 
-	mainMenu :=
-		(&menu.Builder{}).
-			WithOption("Start", func() {
-				fmt.Println("Starting game...")
-			}).
-			WithSubMenu("Settings", settings).
-			WithOption("Quit", func() {
-				fmt.Println("quitting")
-				os.Exit(0)
-			}).Build()
+	mainMenu := (&menu.Builder{}).
+		WithOption("Start", func() {
+			fmt.Println("Starting game...")
+		}).
+		WithSubMenu("Settings", settings).
+		WithOption("Quit", func() {
+			fmt.Println("quitting")
+			os.Exit(0)
+		}).Build()
 
 	return menu.NewHandler(mainMenu)
 }
