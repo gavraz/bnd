@@ -7,11 +7,15 @@ import (
 )
 
 func buildMenuHandler() *menu.Handler {
+	h := menu.NewHandler()
+
 	settings := (&menu.Builder{}).
 		WithOption("Name", func() {
 		}).
 		WithOption("Character", func() {
-		}).Build()
+		}).
+		WithOption("Go Back", h.GoBack).
+		Build()
 
 	mainMenu := (&menu.Builder{}).
 		WithOption("Start", func() {
@@ -21,7 +25,9 @@ func buildMenuHandler() *menu.Handler {
 		WithOption("Quit", func() {
 			fmt.Println("quitting")
 			os.Exit(0)
-		}).Build()
+		}).
+		Build()
 
-	return menu.NewHandler(mainMenu)
+	h.SetMenu(mainMenu)
+	return h
 }

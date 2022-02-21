@@ -11,12 +11,11 @@ type Handler struct {
 	prev          []*Menu
 	current       *Menu
 	currentChoice int
+	state         bool
 }
 
-func NewHandler(menu *Menu) *Handler {
-	return &Handler{
-		current: menu,
-	}
+func NewHandler() *Handler {
+	return &Handler{}
 }
 
 func (h *Handler) PrevChoice() {
@@ -41,12 +40,21 @@ func (h *Handler) nextMenu(next *Menu) {
 	h.currentChoice = 0
 }
 
+func (h *Handler) stateChanged(prev bool) bool {
+	return prev != h.state
+}
+
 func (h *Handler) Choose() {
+	stateStamp := h.state
 	act := h.current.actions[h.currentChoice]
 	next := act()
-	if h.current != next {
+	if h.current != next && !h.stateChanged(stateStamp) {
 		h.nextMenu(next)
 	}
+}
+
+func (h *Handler) changeState() {
+	h.state = !h.state
 }
 
 func (h *Handler) GoBack() {
@@ -54,10 +62,12 @@ func (h *Handler) GoBack() {
 		return
 	}
 
+	h.changeState()
 	last := len(h.prev) - 1
 	h.current = h.prev[last]
 	h.prev[last] = nil
 	h.prev = h.prev[:last]
+	h.currentChoice = 0
 }
 
 func (h *Handler) Choices() []string {
@@ -68,4 +78,8 @@ func (h *Handler) Choices() []string {
 
 func (h *Handler) CurrentChoice() int {
 	return h.currentChoice
+}
+
+func (h *Handler) SetMenu(menu *Menu) {
+	h.current = menu
 }
