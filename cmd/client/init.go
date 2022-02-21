@@ -8,16 +8,15 @@ import (
 
 func buildMenuHandler() *menu.Handler {
 	h := menu.NewHandler()
-
-	settings := (&menu.Builder{}).
+	settings := menu.NewBuilder(h).
 		WithOption("Name", func() {
 		}).
 		WithOption("Character", func() {
 		}).
-		WithOption("Go Back", h.GoBack).
+		WithGoBack("Go Back").
 		Build()
 
-	mainMenu := (&menu.Builder{}).
+	mainMenu := menu.NewBuilder(h).
 		WithOption("Start", func() {
 			fmt.Println("Starting game...")
 		}).
@@ -29,5 +28,6 @@ func buildMenuHandler() *menu.Handler {
 		Build()
 
 	h.SetMenu(mainMenu)
+
 	return h
 }
