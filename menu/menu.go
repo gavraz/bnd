@@ -41,8 +41,8 @@ func (h *Handler) Choose() {
 	if h.current != next {
 		h.prev = append(h.prev, h.current)
 		h.current = next
+		h.currentChoice = 0
 	}
-	h.currentChoice = 0
 }
 
 func (h *Handler) GoBack() {
