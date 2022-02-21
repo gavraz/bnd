@@ -35,13 +35,17 @@ func (h *Handler) NextChoice() {
 	h.currentChoice++
 }
 
+func (h *Handler) nextMenu(next *Menu) {
+	h.prev = append(h.prev, h.current)
+	h.current = next
+	h.currentChoice = 0
+}
+
 func (h *Handler) Choose() {
 	act := h.current.actions[h.currentChoice]
 	next := act()
 	if h.current != next {
-		h.prev = append(h.prev, h.current)
-		h.current = next
-		h.currentChoice = 0
+		h.nextMenu(next)
 	}
 }
 
