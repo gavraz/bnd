@@ -2,6 +2,7 @@ package console
 
 import (
 	"fmt"
+	term "github.com/nsf/termbox-go"
 )
 
 type choicer interface {
@@ -9,22 +10,29 @@ type choicer interface {
 	Choices() []string
 }
 
+type menuHandler interface {
+	NextChoice()
+	PrevChoice()
+	Choose()
+	GoBack()
+}
+
 type Handler struct {
 	numOfLines int
 }
 
-func New(numOfLines int) Handler {
-	return Handler{numOfLines: numOfLines}
+func New(numOfLines int) *Handler {
+	return &Handler{numOfLines: numOfLines}
 }
 
-func (d Handler) clearScreen() {
-	for i := 0; i < d.numOfLines; i++ {
+func (h *Handler) clearScreen() {
+	for i := 0; i < h.numOfLines; i++ {
 		fmt.Println()
 	}
 }
 
-func (d Handler) DrawMenu(c choicer) {
-	d.clearScreen()
+func (h *Handler) DrawMenu(c choicer) {
+	h.clearScreen()
 
 	current := c.CurrentChoice()
 	for i, item := range c.Choices() {
@@ -36,4 +44,17 @@ func (d Handler) DrawMenu(c choicer) {
 		fmt.Println(item)
 	}
 	fmt.Println()
+}
+
+func (h *Handler) HandleInput(menuHandler menuHandler) {
+	switch ev := term.PollEvent(); ev.Key {
+	case term.KeyArrowDown:
+		menuHandler.NextChoice()
+	case term.KeyArrowUp:
+		menuHandler.PrevChoice()
+	case term.KeyEnter:
+		menuHandler.Choose()
+	case term.KeySpace:
+		menuHandler.GoBack()
+	}
 }
