@@ -3,6 +3,7 @@ module bnd
 go 1.17
 
 require (
+	github.com/gavraz/menu v0.0.0-20220223105155-27b4b002f922
 	github.com/nsf/termbox-go v1.1.1
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
 )

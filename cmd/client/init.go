@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bnd/menu"
 	"fmt"
+	"github.com/gavraz/menu/menu"
 	"os"
 )
 
