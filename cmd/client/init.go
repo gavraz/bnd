@@ -36,10 +36,20 @@ func buildMenuHandler() *menu.Handler {
 
 func buildGameManager() *game.Manager {
 	m := game.NewManager()
-	player1 := game.NewPlayer(&game.GObject{
-		Center: game.Vector2{X: 500, Y: 500},
-	}, 100)
-	m.Add("current-player", player1)
+	m.Add("current-player", game.NewPlayer(&game.GObject{
+		Center: game.Vector2{
+			X: 500,
+			Y: 500,
+		},
+	}, 100))
+	m.Add("crate", &game.Crate{
+		Object: &game.GObject{
+			Center: game.Vector2{
+				X: 200,
+				Y: 200,
+			},
+		},
+	})
 
 	return m
 }
