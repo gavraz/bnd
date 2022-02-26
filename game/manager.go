@@ -10,6 +10,10 @@ func NewManager() *Manager {
 	}
 }
 
+func (m *Manager) SetDirection(name string, direction Direction) {
+	m.objects[name].SetDirection(direction)
+}
+
 func (m *Manager) Add(name string, object Object) {
 	m.objects[name] = object
 }

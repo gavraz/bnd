@@ -41,7 +41,7 @@ func buildGameManager() *game.Manager {
 		Velocity:  1,
 		Direction: game.Direction{},
 	}, 100)
-	m.Add("player", player1)
+	m.Add("current-player", player1)
 
 	return m
 }

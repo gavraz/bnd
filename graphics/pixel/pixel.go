@@ -2,7 +2,6 @@ package pixel
 
 import (
 	"bnd/game"
-	"bnd/physics"
 	"fmt"
 
 	"github.com/faiface/pixel"
@@ -83,28 +82,28 @@ func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 	}
 }
 
-func (h *Handler) HandleInput(object game.Object) {
+type SetDirectioner interface {
+	SetDirection(name string, direction game.Direction)
+}
+
+func (h *Handler) HandleInput(directioner SetDirectioner) {
 	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		object.SetDirection(game.Direction{DX: 0, DY: -1})
-		physics.Move(object)
+		directioner.SetDirection("current-player", game.Direction{DX: 0, DY: -1})
 	}
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		object.SetDirection(game.Direction{DX: 0, DY: 1})
-		physics.Move(object)
+		directioner.SetDirection("current-player", game.Direction{DX: 0, DY: 1})
 	}
 	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		object.SetDirection(game.Direction{DX: -1, DY: 0})
-		physics.Move(object)
+		directioner.SetDirection("current-player", game.Direction{DX: -1, DY: 0})
 	}
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		object.SetDirection(game.Direction{DX: 1, DY: 0})
-		physics.Move(object)
+		directioner.SetDirection("current-player", game.Direction{DX: 1, DY: 0})
 	}
 }
 
 func (h *Handler) DrawGame(objects map[string]game.Object) {
 	h.win.Clear(colornames.Black) // TODO decide color
-	
+
 	// TODO draw board
 
 	for _, o := range objects {
