@@ -3,8 +3,9 @@ package main
 import (
 	"bnd/game"
 	"fmt"
-	"github.com/gavraz/menu/menu"
 	"os"
+
+	"github.com/gavraz/menu/menu"
 )
 
 func buildMenuHandler() *menu.Handler {
@@ -34,13 +35,13 @@ func buildMenuHandler() *menu.Handler {
 }
 
 func buildGameManager() *game.Manager {
-	m := &game.Manager{}
-	player1 := game.NewPlayer(game.GObject{
+	m := game.NewManager()
+	player1 := game.NewPlayer(&game.GObject{
 		Point:     game.Point{X: 100, Y: 100},
 		Velocity:  1,
 		Direction: game.Direction{},
 	}, 100)
-	m.Add(player1)
+	m.Add("player", player1)
 
 	return m
 }

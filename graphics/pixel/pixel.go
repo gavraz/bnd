@@ -2,8 +2,11 @@ package pixel
 
 import (
 	"bnd/game"
+	"bnd/physics"
 	"fmt"
+
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/faiface/pixel/text"
 	"golang.org/x/image/colornames"
@@ -65,7 +68,7 @@ func (h *Handler) DrawMenu(c choicer) {
 	}
 }
 
-func (h *Handler) HandleInput(menuHandler menuHandler) {
+func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 	if h.win.JustPressed(pixelgl.KeyS) || h.win.JustPressed(pixelgl.KeyDown) {
 		menuHandler.NextChoice()
 	}
@@ -80,9 +83,28 @@ func (h *Handler) HandleInput(menuHandler menuHandler) {
 	}
 }
 
-func (h *Handler) DrawGame(objects []game.Object) {
-	h.win.Clear(colornames.Black) // TODO decide color
+func (h *Handler) HandleInput(object game.Object) {
+	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
+		object.SetDirection(game.Direction{DX: 0, DY: -1})
+		physics.Move(object)
+	}
+	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
+		object.SetDirection(game.Direction{DX: 0, DY: 1})
+		physics.Move(object)
+	}
+	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
+		object.SetDirection(game.Direction{DX: -1, DY: 0})
+		physics.Move(object)
+	}
+	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
+		object.SetDirection(game.Direction{DX: 1, DY: 0})
+		physics.Move(object)
+	}
+}
 
+func (h *Handler) DrawGame(objects map[string]game.Object) {
+	h.win.Clear(colornames.Black) // TODO decide color
+	
 	// TODO draw board
 
 	for _, o := range objects {
@@ -92,8 +114,22 @@ func (h *Handler) DrawGame(objects []game.Object) {
 
 func (h *Handler) drawGameObject(object game.Object) {
 	switch object.(type) {
-	case game.Player:
-	case game.Crate:
+	case *game.Player:
+		imd := imdraw.New(nil)
+		imd.Color = pixel.RGB(1, 0, 0)
+		imd.Push(pixel.V(float64(object.GetPoint().X), float64(object.GetPoint().Y)))
+		imd.Color = pixel.RGB(0, 1, 0)
+		imd.Push(pixel.V(float64(object.GetPoint().X+50), float64(object.GetPoint().Y)))
+		imd.Color = pixel.RGB(0, 0, 1)
+		imd.Push(pixel.V(float64(object.GetPoint().X+50), float64(object.GetPoint().Y+50)))
+		imd.Color = pixel.RGB(0, 1, 1)
+		imd.Push(pixel.V(float64(object.GetPoint().X), float64(object.GetPoint().Y+50)))
+
+		imd.Polygon(0)
+
+		imd.Draw(h.win)
+	case *game.Crate:
 	default:
+		fmt.Println("Unknown object type")
 	}
 }

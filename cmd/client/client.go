@@ -3,6 +3,7 @@ package main
 import (
 	pixelg "bnd/graphics/pixel"
 	"fmt"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 )
@@ -27,7 +28,7 @@ func run() {
 		//displayHandler.HandleInput(menuHandler)
 
 		displayHandler.DrawGame(gameManager.Objects())
-
+		displayHandler.HandleInput(gameManager.Objects()["player"])
 		gameManager.Update()
 		displayHandler.Update()
 	}

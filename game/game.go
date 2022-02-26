@@ -15,6 +15,7 @@ type Object interface {
 	GetPoint() Point
 	SetPoint(p Point)
 	GetDirection() Direction
+	SetDirection(d Direction)
 	GetVelocity() float32
 }
 
@@ -32,24 +33,28 @@ type GObject struct {
 	Direction
 }
 
-func (o GObject) GetPoint() Point {
+func (o *GObject) GetPoint() Point {
 	return o.Point
 }
 
-func (o GObject) SetPoint(p Point) {
+func (o *GObject) SetPoint(p Point) {
 	o.Point = p
 }
 
-func (o GObject) GetDirection() Direction {
+func (o *GObject) GetDirection() Direction {
 	return o.Direction
 }
 
-func (o GObject) GetVelocity() float32 {
+func (o *GObject) SetDirection(d Direction) {
+	o.Direction = d
+}
+
+func (o *GObject) GetVelocity() float32 {
 	return o.Velocity
 }
 
 type Crate struct {
-	GObject
+	Object
 
 	ability Ability
 }

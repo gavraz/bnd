@@ -1,11 +1,17 @@
 package game
 
 type Manager struct {
-	objects []Object
+	objects map[string]Object
 }
 
-func (m *Manager) Add(object Object) {
-	m.objects = append(m.objects, object)
+func NewManager() *Manager {
+	return &Manager{
+		objects: make(map[string]Object),
+	}
+}
+
+func (m *Manager) Add(name string, object Object) {
+	m.objects[name] = object
 }
 
 func (m *Manager) Update() { // TODO: param of time
@@ -17,6 +23,6 @@ func (m *Manager) Update() { // TODO: param of time
 	}
 }
 
-func (m *Manager) Objects() []Object {
+func (m *Manager) Objects() map[string]Object {
 	return m.objects // TODO safety?
 }
