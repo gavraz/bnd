@@ -24,11 +24,11 @@ type Object interface {
 }
 
 type Point struct {
-	X, Y float32
+	X, Y float64
 }
 
 type Vector2 struct {
-	X, Y float32
+	X, Y float64
 }
 
 type GObject struct {

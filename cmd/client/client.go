@@ -27,7 +27,7 @@ func run() {
 		//displayHandler.DrawMenu(menuHandler)
 		//displayHandler.HandleInput(menuHandler)
 
-		displayHandler.DrawGame(gameManager.Objects())
+		displayHandler.DrawGame(gameManager)
 		displayHandler.HandleInput(gameManager)
 		gameManager.Update()
 		displayHandler.Update()
