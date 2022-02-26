@@ -104,7 +104,16 @@ func (h *Handler) HandleInput(directioner SetDirectioner) {
 func (h *Handler) DrawGame(objects map[string]game.Object) {
 	h.win.Clear(colornames.Black) // TODO decide color
 
-	// TODO draw board
+	var width = h.cfg.Bounds.W() * 1.0
+	var height = h.cfg.Bounds.H() * 1.0
+	var sidePadding = h.cfg.Bounds.W() * 0.02
+	var bottomPadding = h.cfg.Bounds.H() * 0.15
+	border := imdraw.New(nil)
+	border.Color = pixel.RGB(255, 255, 255)
+	border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
+	border.Push(pixel.V(width-sidePadding, height-sidePadding))
+	border.Rectangle(1)
+	border.Draw(h.win)
 
 	for _, o := range objects {
 		h.drawGameObject(o)
