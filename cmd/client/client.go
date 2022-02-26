@@ -19,12 +19,16 @@ func run() {
 	displayHandler := pixelg.New(cfg)
 	displayHandler.Init()
 
-	menuHandler := buildMenuHandler()
+	gameManager := buildGameManager()
+	//menuHandler := buildMenuHandler()
 
 	for !displayHandler.Closed() {
-		displayHandler.DrawMenu(menuHandler)
-		displayHandler.HandleInput(menuHandler)
+		//displayHandler.DrawMenu(menuHandler)
+		//displayHandler.HandleInput(menuHandler)
 
+		displayHandler.DrawGame(gameManager.Objects())
+
+		gameManager.Update()
 		displayHandler.Update()
 	}
 }

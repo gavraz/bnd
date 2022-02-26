@@ -1,6 +1,7 @@
 package pixel
 
 import (
+	"bnd/game"
 	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -76,5 +77,23 @@ func (h *Handler) HandleInput(menuHandler menuHandler) {
 	}
 	if h.win.JustPressed(pixelgl.KeyEscape) || h.win.JustPressed(pixelgl.KeyBackspace) {
 		menuHandler.GoBack()
+	}
+}
+
+func (h *Handler) DrawGame(objects []game.Object) {
+	h.win.Clear(colornames.Black) // TODO decide color
+
+	// TODO draw board
+
+	for _, o := range objects {
+		h.drawGameObject(o)
+	}
+}
+
+func (h *Handler) drawGameObject(object game.Object) {
+	switch object.(type) {
+	case game.Player:
+	case game.Crate:
+	default:
 	}
 }
