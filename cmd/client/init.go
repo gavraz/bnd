@@ -37,9 +37,10 @@ func buildMenuHandler() *menu.Handler {
 func buildGameManager() *game.Manager {
 	m := game.NewManager()
 	player1 := game.NewPlayer(&game.GObject{
-		Point:     game.Point{X: 100, Y: 100},
-		Velocity:  1,
-		Direction: game.Direction{},
+		Point:        game.Point{X: 100, Y: 100},
+		Velocity:     game.Vector2{X: 0, Y: 0},
+		Acceleration: game.Vector2{X: 0, Y: 0},
+		Direction:    game.Vector2{X: 0, Y: 0},
 	}, 100)
 	m.Add("current-player", player1)
 

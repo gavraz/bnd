@@ -10,7 +10,7 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) SetDirection(name string, direction Direction) {
+func (m *Manager) SetDirection(name string, direction Vector2) {
 	m.objects[name].SetDirection(direction)
 }
 
@@ -20,10 +20,12 @@ func (m *Manager) Add(name string, object Object) {
 
 func (m *Manager) Update() { // TODO: param of time
 	for _, g := range m.objects {
+		g.UpdateVelocity()
 		g.SetPoint(Point{
-			X: g.GetPoint().X + g.GetDirection().DX*g.GetVelocity(),
-			Y: g.GetPoint().Y + g.GetDirection().DY*g.GetVelocity(),
+			X: g.GetPoint().X + g.GetVelocity().X,
+			Y: g.GetPoint().Y + g.GetVelocity().Y,
 		})
+		g.SetVelocity(Vector2{X: g.GetVelocity().X * 0.95, Y: g.GetVelocity().Y * 0.95})
 	}
 }
 

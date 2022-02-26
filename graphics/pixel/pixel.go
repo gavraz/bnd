@@ -82,23 +82,23 @@ func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 	}
 }
 
-type SetDirectioner interface {
-	SetDirection(name string, direction game.Direction)
-}
-
-func (h *Handler) HandleInput(directioner SetDirectioner) {
+func (h *Handler) HandleInput(gameManager *game.Manager) { // Direction isn't needed atm, will be needed when we need to aim
 	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		directioner.SetDirection("current-player", game.Direction{DX: 0, DY: -1})
+		//gameManager.Objects()["current-player"].SetDirection(game.Vector2{X: 0, Y: -1})
+		gameManager.Objects()["current-player"].SetAcceleration(game.Vector2{X: 0, Y: -0.3})
+	} else if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
+		//gameManager.Objects()["current-player"].SetDirection(game.Vector2{X: 0, Y: 1})
+		gameManager.Objects()["current-player"].SetAcceleration(game.Vector2{X: 0, Y: 0.3})
+	} else if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
+		//gameManager.Objects()["current-player"].SetDirection(game.Vector2{X: -1, Y: 0})
+		gameManager.Objects()["current-player"].SetAcceleration(game.Vector2{X: -0.3, Y: 0})
+	} else if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
+		//gameManager.Objects()["current-player"].SetDirection(game.Vector2{X: 1, Y: 0})
+		gameManager.Objects()["current-player"].SetAcceleration(game.Vector2{X: 0.3, Y: 0})
+	} else {
+		gameManager.Objects()["current-player"].SetAcceleration(game.Vector2{X: 0, Y: 0})
 	}
-	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		directioner.SetDirection("current-player", game.Direction{DX: 0, DY: 1})
-	}
-	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		directioner.SetDirection("current-player", game.Direction{DX: -1, DY: 0})
-	}
-	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		directioner.SetDirection("current-player", game.Direction{DX: 1, DY: 0})
-	}
+
 }
 
 func (h *Handler) DrawGame(objects map[string]game.Object) {
