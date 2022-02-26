@@ -77,21 +77,6 @@ type Crate struct {
 	ability Ability
 }
 
-type Player struct {
-	Object
-
-	hp        int
-	primary   Ability
-	secondary Ability
-}
-
-func NewPlayer(object Object, hp int) *Player {
-	return &Player{
-		Object: object,
-		hp:     hp,
-	}
-}
-
 type Bullet struct {
 	GObject
 }

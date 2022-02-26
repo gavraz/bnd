@@ -125,13 +125,14 @@ func (h *Handler) DrawGame(env Objecter) {
 		h.drawGameObject(o)
 	}
 
-	h.drawGameBottomPanel()
+	player := (objects["current-player"]).(*game.Player)
+	h.drawGameBottomPanel(player.HP())
 }
 
-func (h *Handler) drawGameBottomPanel() {
+func (h *Handler) drawGameBottomPanel(hp int) {
 	basicAtlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
 	basicTxt := text.New(pixel.V(h.w()*0.02, h.h()*0.1), basicAtlas)
-	_, _ = fmt.Fprintln(basicTxt, "HP: 100")
+	_, _ = fmt.Fprintln(basicTxt, "HP: ", hp)
 	basicTxt.Draw(h.win, pixel.IM.Scaled(basicTxt.Orig, 2.5))
 }
 
