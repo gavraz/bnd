@@ -12,6 +12,7 @@ const (
 )
 
 type Object interface {
+	Radius() float64
 	GetCenter() Vector2
 	SetCenter(p Vector2)
 	GetDirection() Vector2
@@ -28,10 +29,15 @@ type Vector2 struct {
 }
 
 type GObject struct {
-	Center       Vector2
-	Velocity     Vector2
-	Acceleration Vector2
-	Direction    Vector2
+	CollisionRadius float64
+	Center          Vector2
+	Velocity        Vector2
+	Acceleration    Vector2
+	Direction       Vector2
+}
+
+func (g *GObject) Radius() float64 {
+	return g.CollisionRadius
 }
 
 func (g *GObject) GetCenter() Vector2 {

@@ -41,6 +41,7 @@ func buildGameManager() *game.Manager {
 			X: 500,
 			Y: 500,
 		},
+		CollisionRadius: 20,
 	}, 100))
 	m.Add("crate", &game.Crate{
 		Object: &game.GObject{
@@ -48,6 +49,7 @@ func buildGameManager() *game.Manager {
 				X: 200,
 				Y: 200,
 			},
+			CollisionRadius: 20,
 		},
 	})
 
