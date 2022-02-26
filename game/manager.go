@@ -1,5 +1,9 @@
 package game
 
+const (
+	playerVelocityDecay = 0.95
+)
+
 type Manager struct {
 	objects map[string]Object
 }
@@ -21,11 +25,14 @@ func (m *Manager) Add(name string, object Object) {
 func (m *Manager) Update() { // TODO: param of time
 	for _, g := range m.objects {
 		g.UpdateVelocity()
-		g.SetPoint(Point{
-			X: g.GetPoint().X + g.GetVelocity().X,
-			Y: g.GetPoint().Y + g.GetVelocity().Y,
+		g.SetCenter(Vector2{
+			X: g.GetCenter().X + g.GetVelocity().X,
+			Y: g.GetCenter().Y + g.GetVelocity().Y,
 		})
-		g.SetVelocity(Vector2{X: g.GetVelocity().X * 0.95, Y: g.GetVelocity().Y * 0.95})
+		g.SetVelocity(Vector2{
+			X: g.GetVelocity().X * playerVelocityDecay,
+			Y: g.GetVelocity().Y * playerVelocityDecay,
+		})
 	}
 }
 

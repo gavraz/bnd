@@ -12,8 +12,8 @@ const (
 )
 
 type Object interface {
-	GetPoint() Point
-	SetPoint(p Point)
+	GetCenter() Vector2
+	SetCenter(p Vector2)
 	GetDirection() Vector2
 	SetDirection(d Vector2)
 	GetVelocity() Vector2
@@ -23,43 +23,39 @@ type Object interface {
 	SetAcceleration(a Vector2)
 }
 
-type Point struct {
-	X, Y float64
-}
-
 type Vector2 struct {
 	X, Y float64
 }
 
 type GObject struct {
-	Point
+	Center       Vector2
 	Velocity     Vector2
 	Acceleration Vector2
 	Direction    Vector2
 }
 
-func (o *GObject) GetPoint() Point {
-	return o.Point
+func (g *GObject) GetCenter() Vector2 {
+	return g.Center
 }
 
-func (o *GObject) SetPoint(p Point) {
-	o.Point = p
+func (g *GObject) SetCenter(p Vector2) {
+	g.Center = p
 }
 
-func (o *GObject) GetDirection() Vector2 {
-	return o.Direction
+func (g *GObject) GetDirection() Vector2 {
+	return g.Direction
 }
 
-func (o *GObject) SetDirection(d Vector2) {
-	o.Direction = d
+func (g *GObject) SetDirection(d Vector2) {
+	g.Direction = d
 }
 
-func (o *GObject) GetVelocity() Vector2 {
-	return o.Velocity
+func (g *GObject) GetVelocity() Vector2 {
+	return g.Velocity
 }
 
-func (o *GObject) GetAcceleration() Vector2 {
-	return o.Acceleration
+func (g *GObject) GetAcceleration() Vector2 {
+	return g.Acceleration
 }
 
 func (g *GObject) UpdateVelocity() {
@@ -67,8 +63,8 @@ func (g *GObject) UpdateVelocity() {
 	g.Velocity.Y += g.Acceleration.Y
 }
 
-func (o *GObject) SetVelocity(a Vector2) {
-	o.Velocity = a
+func (g *GObject) SetVelocity(a Vector2) {
+	g.Velocity = a
 }
 
 func (g *GObject) SetAcceleration(a Vector2) {

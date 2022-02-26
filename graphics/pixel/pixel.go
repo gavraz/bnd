@@ -140,7 +140,7 @@ func (h *Handler) drawGameObject(object game.Object) {
 	case *game.Player:
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
-		imd.Push(pixel.V(object.GetPoint().X, object.GetPoint().Y))
+		imd.Push(pixel.V(object.GetCenter().X, object.GetCenter().Y))
 		imd.Circle(h.w()*0.01, 0)
 		imd.Draw(h.win)
 	case *game.Crate:
