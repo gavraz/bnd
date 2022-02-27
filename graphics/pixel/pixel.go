@@ -3,6 +3,7 @@ package pixel
 import (
 	"bnd/game"
 	"fmt"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
@@ -93,19 +94,23 @@ func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 	}
 }
 
-func (h *Handler) HandleInput(env Objecter) {
+func (h *Handler) HandleInput(env Objecter, dt float64) {
 	playerObj := env.Objects()["current-player"]
+	vec := game.Vector2{X: 0, Y: 0}
+	accel := game.Vector2{X: 1024, Y: 1024}
 	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		playerObj.SetAcceleration(game.Vector2{X: 0, Y: -0.3})
-	} else if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		playerObj.SetAcceleration(game.Vector2{X: 0, Y: 0.3})
-	} else if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		playerObj.SetAcceleration(game.Vector2{X: -0.3, Y: 0})
-	} else if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		playerObj.SetAcceleration(game.Vector2{X: 0.3, Y: 0})
-	} else {
-		playerObj.SetAcceleration(game.Vector2{X: 0, Y: 0})
+		vec.Y += (-accel.Y * dt)
 	}
+	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
+		vec.Y += (accel.Y * dt)
+	}
+	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
+		vec.X += (-accel.X * dt)
+	}
+	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
+		vec.X += (accel.X * dt)
+	}
+	playerObj.SetAcceleration(vec)
 }
 
 func (h *Handler) DrawGame(env Objecter) {

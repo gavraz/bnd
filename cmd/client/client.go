@@ -3,6 +3,7 @@ package main
 import (
 	pixelg "bnd/graphics/pixel"
 	"fmt"
+	"time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -22,15 +23,18 @@ func run() {
 
 	gameManager := buildGameManager()
 	//menuHandler := buildMenuHandler()
-
+	//fps := time.Tick(time.Second / 30) // Test out if physics are working as intended with various fps values
+	last := time.Now()
 	for !displayHandler.Closed() {
+		dt := time.Since(last).Seconds()
 		//displayHandler.DrawMenu(menuHandler)
 		//displayHandler.HandleInput(menuHandler)
-
 		displayHandler.DrawGame(gameManager)
-		displayHandler.HandleInput(gameManager)
-		gameManager.Update()
+		last = time.Now()
+		displayHandler.HandleInput(gameManager, dt)
+		gameManager.Update(dt)
 		displayHandler.Update()
+		//<-fps
 	}
 }
 

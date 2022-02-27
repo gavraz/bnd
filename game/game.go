@@ -19,7 +19,7 @@ type Object interface {
 	SetDirection(d Vector2)
 	GetVelocity() Vector2
 	SetVelocity(v Vector2)
-	UpdateVelocity()
+	UpdateVelocity(dt float64)
 	GetAcceleration() Vector2
 	SetAcceleration(a Vector2)
 }
@@ -64,9 +64,9 @@ func (g *GObject) GetAcceleration() Vector2 {
 	return g.Acceleration
 }
 
-func (g *GObject) UpdateVelocity() {
-	g.Velocity.X += g.Acceleration.X
-	g.Velocity.Y += g.Acceleration.Y
+func (g *GObject) UpdateVelocity(dt float64) {
+	g.Velocity.X += g.Acceleration.X * dt
+	g.Velocity.Y += g.Acceleration.Y * dt
 }
 
 func (g *GObject) SetVelocity(a Vector2) {

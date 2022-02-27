@@ -3,7 +3,7 @@ package game
 import "fmt"
 
 const (
-	playerVelocityDecay = 0.95
+	playerVelocityDecay = 4.0
 )
 
 type Manager struct {
@@ -45,20 +45,20 @@ func (m *Manager) collidesWith(obj Object) Object {
 	return nil
 }
 
-func (m *Manager) Update() { // TODO: param of time
+func (m *Manager) Update(dt float64) { // TODO: param of time
 	for _, g := range m.objects {
 		if collider := m.collidesWith(g); collider != nil {
 			fmt.Println("Collision detected: ", g, collider)
 		}
 
-		g.UpdateVelocity()
+		g.UpdateVelocity(dt)
 		g.SetCenter(Vector2{
 			X: g.GetCenter().X + g.GetVelocity().X,
 			Y: g.GetCenter().Y + g.GetVelocity().Y,
 		})
 		g.SetVelocity(Vector2{
-			X: g.GetVelocity().X * playerVelocityDecay,
-			Y: g.GetVelocity().Y * playerVelocityDecay,
+			X: g.GetVelocity().X - g.GetVelocity().X*playerVelocityDecay*dt,
+			Y: g.GetVelocity().Y - g.GetVelocity().Y*playerVelocityDecay*dt,
 		})
 	}
 }
