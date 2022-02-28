@@ -146,16 +146,23 @@ func (h *Handler) drawGameObject(object game.Object) {
 	case *game.Player:
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
-		imd.Push(pixel.V(object.GetCenter().X, object.GetCenter().Y))
+		imd.Push(pixel.V(float64(object.GetCenter().X), float64(object.GetCenter().Y)))
 		imd.Circle(h.w()*0.01, 0)
 		imd.Draw(h.win)
 	case *game.Crate:
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Cyan
-		imd.Push(pixel.V(object.GetCenter().X, object.GetCenter().Y))
-		imd.Push(pixel.V(object.GetCenter().X+20, object.GetCenter().Y+20))
+		imd.Push(pixel.V(float64(object.GetCenter().X-10), float64(object.GetCenter().Y-10)))
+		imd.Push(pixel.V(float64(object.GetCenter().X+10), float64(object.GetCenter().Y+10)))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
+	case *game.BouncingBall:
+		imd := imdraw.New(nil)
+		imd.Color = colornames.Green
+		imd.Push(pixel.V(float64(object.GetCenter().X), float64(object.GetCenter().Y)))
+		imd.Circle(30, 0)
+		imd.Draw(h.win)
+
 	default:
 		fmt.Println("Unknown object type")
 	}

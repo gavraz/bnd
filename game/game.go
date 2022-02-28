@@ -1,5 +1,10 @@
 package game
 
+import (
+	//v "bnd/vector_pointers"
+	v "bnd/vector"
+)
+
 type Ability int
 
 const (
@@ -10,6 +15,8 @@ const (
 	Oil
 	Shield
 )
+
+type Vector2 = v.Vector2
 
 type Object interface {
 	Radius() float64
@@ -22,10 +29,6 @@ type Object interface {
 	UpdateVelocity(dt float64)
 	GetAcceleration() Vector2
 	SetAcceleration(a Vector2)
-}
-
-type Vector2 struct {
-	X, Y float64
 }
 
 type GObject struct {
@@ -65,8 +68,7 @@ func (g *GObject) GetAcceleration() Vector2 {
 }
 
 func (g *GObject) UpdateVelocity(dt float64) {
-	g.Velocity.X += g.Acceleration.X * dt
-	g.Velocity.Y += g.Acceleration.Y * dt
+	g.Velocity = g.Velocity.Add(g.Acceleration.MulScalar(dt))
 }
 
 func (g *GObject) SetVelocity(a Vector2) {
@@ -85,4 +87,8 @@ type Crate struct {
 
 type Bullet struct {
 	GObject
+}
+
+type BouncingBall struct {
+	Object
 }

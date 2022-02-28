@@ -41,7 +41,7 @@ func buildGameManager() *game.Manager {
 			X: 500,
 			Y: 500,
 		},
-		CollisionRadius: 20,
+		CollisionRadius: 10,
 	}, 100))
 	m.Add("crate", &game.Crate{
 		Object: &game.GObject{
@@ -49,7 +49,25 @@ func buildGameManager() *game.Manager {
 				X: 200,
 				Y: 200,
 			},
-			CollisionRadius: 20,
+			CollisionRadius: 10,
+		},
+	})
+	m.Add("crate2", &game.Crate{
+		Object: &game.GObject{
+			Center: game.Vector2{
+				X: 300,
+				Y: 300,
+			},
+			CollisionRadius: 10,
+		},
+	})
+	m.Add("bouncing-ball", &game.BouncingBall{
+		Object: &game.GObject{
+			Center: game.Vector2{
+				X: 100,
+				Y: 300,
+			},
+			CollisionRadius: 30,
 		},
 	})
 
