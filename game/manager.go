@@ -39,6 +39,45 @@ func (m *Manager) collidesWith(obj Object) Object {
 	return nil
 }
 
+func (m *Manager) InitGame() {
+	m.Add("current-player", NewPlayer(&GObject{
+		Center: Vector2{
+			X: 0,
+			Y: 0,
+		},
+		BaseSpeed:     3,
+		CollisionType: Circle,
+		Width:         0.05,
+		Height:        0.05,
+		Mass:          100,
+	}, 100))
+	m.Add("crate", &Crate{
+		Object: &GObject{
+			Center: Vector2{
+				X: -0.2,
+				Y: -0.2,
+			},
+			CollisionType: Rectangle,
+			Width:         0.1,
+			Height:        0.1,
+			Mass:          1,
+		},
+	})
+	m.Add("crate2", &Crate{
+		Object: &GObject{
+			Center: Vector2{
+				X: -0.3,
+				Y: -0.3,
+			},
+			CollisionType: Rectangle,
+			Width:         0.1,
+			Height:        0.1,
+			Mass:          1,
+		},
+	})
+
+}
+
 func (m *Manager) checkCollision(obj, other Object) Object {
 	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
 		p1 := obj.GetCenter()
