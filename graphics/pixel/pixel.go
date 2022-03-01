@@ -97,18 +97,17 @@ func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 func (h *Handler) HandleInput(env Objecter, dt float64) {
 	playerObj := env.Objects()["current-player"]
 	vec := game.Vector2{X: 0, Y: 0}
-	accel := game.Vector2{X: 1024, Y: 1024}
 	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		vec.Y += (-accel.Y * dt)
+		vec.Y += (-playerObj.GetBaseSpeed() * dt)
 	}
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		vec.Y += (accel.Y * dt)
+		vec.Y += (playerObj.GetBaseSpeed() * dt)
 	}
 	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		vec.X += (-accel.X * dt)
+		vec.X += (-playerObj.GetBaseSpeed() * dt)
 	}
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		vec.X += (accel.X * dt)
+		vec.X += (playerObj.GetBaseSpeed() * dt)
 	}
 	playerObj.SetAcceleration(vec)
 }
@@ -117,14 +116,14 @@ func (h *Handler) DrawGame(env Objecter) {
 	objects := env.Objects()
 	h.win.Clear(colornames.Black) // TODO decide color
 
-	var sidePadding = h.cfg.Bounds.W() * 0.02
-	var bottomPadding = h.cfg.Bounds.H() * 0.15
-	border := imdraw.New(nil)
-	border.Color = pixel.RGB(255, 255, 255)
-	border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
-	border.Push(pixel.V(h.w()-sidePadding, h.h()-sidePadding))
-	border.Rectangle(1)
-	border.Draw(h.win)
+	// var sidePadding = h.cfg.Bounds.W() * 0.02
+	// var bottomPadding = h.cfg.Bounds.H() * 0.15
+	// border := imdraw.New(nil)
+	// border.Color = pixel.RGB(255, 255, 255)
+	// border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
+	// border.Push(pixel.V(h.w()-sidePadding, h.h()-sidePadding))
+	// border.Rectangle(1)
+	// border.Draw(h.win)
 
 	for _, o := range objects {
 		h.drawGameObject(o)
@@ -147,20 +146,20 @@ func (h *Handler) drawGameObject(object game.Object) {
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
 		imd.Push(pixel.V(float64(object.GetCenter().X), float64(object.GetCenter().Y)))
-		imd.Circle(h.w()*0.01, 0)
+		imd.Circle(object.GetWidth()/2, 0)
 		imd.Draw(h.win)
 	case *game.Crate:
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Cyan
-		imd.Push(pixel.V(float64(object.GetCenter().X-10), float64(object.GetCenter().Y-10)))
-		imd.Push(pixel.V(float64(object.GetCenter().X+10), float64(object.GetCenter().Y+10)))
+		imd.Push(pixel.V(float64(object.GetCenter().X-object.GetWidth()/2), float64(object.GetCenter().Y-object.GetHeight()/2)))
+		imd.Push(pixel.V(float64(object.GetCenter().X+object.GetWidth()/2), float64(object.GetCenter().Y+object.GetHeight()/2)))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
 	case *game.BouncingBall:
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Green
 		imd.Push(pixel.V(float64(object.GetCenter().X), float64(object.GetCenter().Y)))
-		imd.Circle(30, 0)
+		imd.Circle(object.GetWidth()/2, 0)
 		imd.Draw(h.win)
 
 	default:

@@ -16,10 +16,17 @@ const (
 	Shield
 )
 
+type CollisionTypes int
+
+const (
+	Rectangle CollisionTypes = iota
+	Circle
+)
+
 type Vector2 = v.Vector2
 
 type Object interface {
-	Radius() float64
+	GetCollisionType() CollisionTypes
 	GetCenter() Vector2
 	SetCenter(p Vector2)
 	GetDirection() Vector2
@@ -29,22 +36,39 @@ type Object interface {
 	UpdateVelocity(dt float64)
 	GetAcceleration() Vector2
 	SetAcceleration(a Vector2)
+	GetWidth() float64
+	GetHeight() float64
+	GetBaseSpeed() float64
+	SetBaseSpeed(s float64)
+	GetMass() float64
 }
 
 type GObject struct {
-	CollisionRadius float64
-	Center          Vector2
-	Velocity        Vector2
-	Acceleration    Vector2
-	Direction       Vector2
+	CollisionType CollisionTypes
+	Width         float64
+	Height        float64
+	Center        Vector2
+	Velocity      Vector2
+	Acceleration  Vector2
+	Direction     Vector2
+	BaseSpeed     float64
+	Mass          float64
 }
 
-func (g *GObject) Radius() float64 {
-	return g.CollisionRadius
+func (g *GObject) GetCollisionType() CollisionTypes {
+	return g.CollisionType
 }
 
 func (g *GObject) GetCenter() Vector2 {
 	return g.Center
+}
+
+func (g *GObject) GetHeight() float64 {
+	return g.Height
+}
+
+func (g *GObject) GetWidth() float64 {
+	return g.Width
 }
 
 func (g *GObject) SetCenter(p Vector2) {
@@ -79,6 +103,18 @@ func (g *GObject) SetAcceleration(a Vector2) {
 	g.Acceleration = a
 }
 
+func (g *GObject) GetBaseSpeed() float64 {
+	return g.BaseSpeed
+}
+
+func (g *GObject) SetBaseSpeed(s float64) {
+	g.BaseSpeed = s
+}
+
+func (g *GObject) GetMass() float64 {
+	return g.Mass
+}
+
 type Crate struct {
 	Object
 
@@ -86,7 +122,7 @@ type Crate struct {
 }
 
 type Bullet struct {
-	GObject
+	Object
 }
 
 type BouncingBall struct {

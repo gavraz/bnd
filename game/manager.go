@@ -31,27 +31,154 @@ func (m *Manager) collidesWith(obj Object) Object {
 		if other == obj {
 			continue
 		}
+		if collider := m.checkCollision(obj, other); collider != nil {
+			return collider
+		}
+	}
+	return nil
+}
+
+func (m *Manager) checkCollision(obj, other Object) Object {
+	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
 		p1 := obj.GetCenter()
 		p2 := other.GetCenter()
-		r1 := obj.Radius()
-		r2 := other.Radius()
+		r1 := obj.GetWidth() / 2
+		r2 := other.GetWidth() / 2
 		dist := p1.Distance(p2)
 		if dist <= r1+r2 {
+			return other
+		}
+	}
+	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Rectangle || obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Circle {
+		circle, rectangle := obj, other
+		if obj.GetCollisionType() == Rectangle {
+			circle, rectangle = other, obj
+		}
+		cx := circle.GetCenter().X
+		cy := circle.GetCenter().Y
+		rx := rectangle.GetCenter().X
+		ry := rectangle.GetCenter().Y
+		rw := rectangle.GetWidth() / 2
+		rh := rectangle.GetHeight() / 2
+
+		testX := cx
+		testY := cy
+
+		if cx < rx-rw {
+			testX = rx - rw // left edge
+		} else if cx > rx+rw {
+			testX = rx + rw // right edge
+		}
+		if cy < ry-rh {
+			testY = ry - rh // bottom edge
+		} else if cy > ry+rh {
+			testY = ry + rh // top edge
+		}
+
+		distX := cx - testX
+		distY := cy - testY
+		distanceSquared := (distX * distX) + (distY * distY)
+		radiusSquared := (circle.GetWidth() / 2) * (circle.GetWidth() / 2)
+
+		if distanceSquared <= radiusSquared {
+			return other
+		}
+	}
+	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
+		p1 := obj.GetCenter()
+		p2 := other.GetCenter()
+		w1 := obj.GetWidth() / 2
+		h1 := obj.GetHeight() / 2
+		w2 := other.GetWidth() / 2
+		h2 := other.GetHeight() / 2
+		if p1.X-w1 < p2.X+w2 && p1.X+w1 > p2.X-w2 && p1.Y-h1 < p2.Y+h2 && p1.Y+h1 > p2.Y-h2 {
 			return other
 		}
 	}
 	return nil
 }
 
+func (m *Manager) fixIntersection(obj Object, other Object) {
+	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
+		c1 := obj.GetCenter()
+		c2 := other.GetCenter()
+		r1 := obj.GetWidth() / 2
+		r2 := other.GetWidth() / 2
+		obj.SetCenter(other.GetCenter().Add(c1.Sub(c2).Normalize().MulScalar(r1 + r2 + 1)))
+		other.SetCenter(obj.GetCenter().Add(c2.Sub(c1).Normalize().MulScalar(r1 + r2 + 1)))
+	}
+	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
+		p1 := obj.GetCenter()
+		p2 := other.GetCenter()
+		w1 := obj.GetWidth() / 2
+		h1 := obj.GetHeight() / 2
+		w2 := other.GetWidth() / 2
+		h2 := other.GetHeight() / 2
+		xDistSquared := (p1.X - p2.X) * (p1.X - p2.X)
+		yDistSquared := (p1.Y - p2.Y) * (p1.Y - p2.Y)
+		if xDistSquared > yDistSquared {
+			if p1.X > p2.X {
+				obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1, Y: obj.GetCenter().Y})
+				other.SetCenter(Vector2{X: obj.GetCenter().X - w2 - w1, Y: other.GetCenter().Y})
+			} else {
+				obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1, Y: obj.GetCenter().Y})
+				other.SetCenter(Vector2{X: obj.GetCenter().X + w2 + w1, Y: other.GetCenter().Y})
+			}
+		} else {
+			if p1.Y > p2.Y {
+				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1})
+				other.SetCenter(Vector2{X: other.GetCenter().X, Y: obj.GetCenter().Y - h2 - h1})
+			} else {
+				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1})
+				other.SetCenter(Vector2{X: other.GetCenter().X, Y: obj.GetCenter().Y + h2 + h1})
+			}
+		}
+	}
+	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Rectangle {
+		// if obj.GetCollisionType() == Rectangle {
+		// 	obj, other = other, obj
+		// }
+		cx := obj.GetCenter().X
+		cy := obj.GetCenter().Y
+		cr := obj.GetWidth() / 2
+		rx := other.GetCenter().X
+		ry := other.GetCenter().Y
+		rw := other.GetWidth() / 2
+		rh := other.GetHeight() / 2
+		cdx := cx
+		cdy := cy
+		rdx := rx
+		rdy := ry
+
+		if cx < rx-rw {
+			cdx = rx - rw                                  // left edge
+			obj.SetCenter(Vector2{X: rx - rw - cr, Y: cy}) // left edge
+			other.SetCenter(Vector2{X: cx + rw + cr, Y: ry})
+		} else if cx > rx+rw {
+			obj.SetCenter(Vector2{X: rx + rw + cr, Y: cy}) // right edge
+			other.SetCenter(Vector2{X: cx - rw - cr, Y: ry})
+		}
+		if cy < ry-rh {
+			obj.SetCenter(Vector2{X: cx, Y: ry - rh - cr}) // bottom edge
+			other.SetCenter(Vector2{X: rx, Y: cy + rh + cr})
+		} else if cy > ry+rh {
+			obj.SetCenter(Vector2{X: cx, Y: ry + rh + cr}) // top edge
+			other.SetCenter(Vector2{X: rx, Y: cy - rh - cr})
+		}
+		obj.SetCenter(Vector2{X: cdx, Y: cdy})
+		other.SetCenter(Vector2{X: rdx, Y: rdy})
+
+	}
+
+}
+
 func (m *Manager) Update(dt float64) { // TODO: param of time
-	//l := list.New()
 	for _, g := range m.objects {
 		g.UpdateVelocity(dt)
 		if collider := m.collidesWith(g); collider != nil {
-			//fmt.Println("Collision detected: ", g, collider)
 			fmt.Println("Collision detected: ", g.GetCenter(), collider.GetCenter())
 			// Momentum and impulse calculations
-			// http://www.gamasutra.com/view/feature/131790/pool_hall_lessons_fast_accurate_.php?page=3
+			// https://www.gamasutra.com/view/feature/3015/pool_hall_lessons_fast_accurate_.php?page=3
 			r1 := g.GetCenter()
 			r2 := collider.GetCenter()
 			n := r1.Sub(r2).Normalize()
@@ -63,14 +190,12 @@ func (m *Manager) Update(dt float64) { // TODO: param of time
 			// optimizedP =  2(a1 - a2)
 			//              -----------
 			//                m1 + m2
-			optimizedP := (2.0 * (a1 - a2)) / 2
-			u1 := v1.Sub(n.MulScalar(optimizedP))
-			u2 := v2.Add(n.MulScalar(optimizedP))
+			optimizedP := (2.0 * (a1 - a2)) / (g.GetMass() + collider.GetMass())
+			u1 := v1.Sub(n.MulScalar(optimizedP * collider.GetMass()))
+			u2 := v2.Add(n.MulScalar(optimizedP * g.GetMass()))
 			g.SetVelocity(u1)
 			collider.SetVelocity(u2)
-			g.SetCenter(collider.GetCenter().Add(r1.Sub(r2).Normalize().MulScalar(g.Radius() + collider.Radius() + 1)))
-			collider.SetCenter(g.GetCenter().Add(r2.Sub(r1).Normalize().MulScalar(g.Radius() + collider.Radius() + 1)))
-
+			m.fixIntersection(g, collider)
 		}
 	}
 	for _, g := range m.objects {

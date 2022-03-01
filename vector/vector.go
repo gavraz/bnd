@@ -82,7 +82,7 @@ func (v Vector2) Dot(other Vector2) float64 {
 }
 
 func (v Vector2) Normalize() Vector2 {
-	return v.Div(*NewVector2(v.Length(), v.Length()))
+	return v.DivScalar(v.Length())
 }
 
 func (v Vector2) Length() float64 {
