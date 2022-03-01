@@ -159,11 +159,7 @@ func (h *Handler) drawGameObject(object game.Object) {
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
 		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
-		//imd.Circle(playerSize.X/2, 0)
 		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
-		// imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
-		// imd.Push(pixel.V(playerCenter.X+playerSize.X/2, playerCenter.Y+playerSize.Y/2))
-		// imd.Rectangle(0)
 
 		imd.Draw(h.win)
 	case *game.Crate:
@@ -183,7 +179,6 @@ func (h *Handler) drawGameObject(object game.Object) {
 		imd.Color = colornames.Green
 		imd.Push(pixel.V(ballCenter.X, ballCenter.Y))
 		imd.Ellipse(pixel.Vec{X: ballSize.X / 2, Y: ballSize.Y / 2}, 0)
-		//imd.Circle(ballSize.X/2, 0)
 		imd.Draw(h.win)
 
 	default:
