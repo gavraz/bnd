@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 )
 
 const (
@@ -100,13 +101,13 @@ func (m *Manager) checkCollision(obj, other Object) Object {
 
 func (m *Manager) fixIntersection(obj Object, other Object) {
 	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
-		c1 := obj.GetCenter()
-		c2 := other.GetCenter()
+		p1 := obj.GetCenter()
+		p2 := other.GetCenter()
 		r1 := obj.GetWidth() / 2
 		r2 := other.GetWidth() / 2
-		obj.SetCenter(other.GetCenter().Add(c1.Sub(c2).Normalize().MulScalar(r1 + r2 + 1)))
-		other.SetCenter(obj.GetCenter().Add(c2.Sub(c1).Normalize().MulScalar(r1 + r2 + 1)))
+		obj.SetCenter(other.GetCenter().Add(p1.Sub(p2).Normalize().MulScalar(r1 + r2 + 1)))
 	}
+
 	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
 		p1 := obj.GetCenter()
 		p2 := other.GetCenter()
@@ -118,58 +119,34 @@ func (m *Manager) fixIntersection(obj Object, other Object) {
 		yDistSquared := (p1.Y - p2.Y) * (p1.Y - p2.Y)
 		if xDistSquared > yDistSquared {
 			if p1.X > p2.X {
-				obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1, Y: obj.GetCenter().Y})
-				other.SetCenter(Vector2{X: obj.GetCenter().X - w2 - w1, Y: other.GetCenter().Y})
+				obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1 + 1, Y: obj.GetCenter().Y})
 			} else {
-				obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1, Y: obj.GetCenter().Y})
-				other.SetCenter(Vector2{X: obj.GetCenter().X + w2 + w1, Y: other.GetCenter().Y})
+				obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1 - 1, Y: obj.GetCenter().Y})
 			}
 		} else {
 			if p1.Y > p2.Y {
-				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1})
-				other.SetCenter(Vector2{X: other.GetCenter().X, Y: obj.GetCenter().Y - h2 - h1})
+				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1 + 1})
 			} else {
-				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1})
-				other.SetCenter(Vector2{X: other.GetCenter().X, Y: obj.GetCenter().Y + h2 + h1})
+				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1 - 1})
 			}
 		}
 	}
 	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Rectangle {
-		// if obj.GetCollisionType() == Rectangle {
-		// 	obj, other = other, obj
-		// }
-		cx := obj.GetCenter().X
-		cy := obj.GetCenter().Y
-		cr := obj.GetWidth() / 2
-		rx := other.GetCenter().X
-		ry := other.GetCenter().Y
-		rw := other.GetWidth() / 2
-		rh := other.GetHeight() / 2
-		cdx := cx
-		cdy := cy
-		rdx := rx
-		rdy := ry
-
-		if cx < rx-rw {
-			cdx = rx - rw                                  // left edge
-			obj.SetCenter(Vector2{X: rx - rw - cr, Y: cy}) // left edge
-			other.SetCenter(Vector2{X: cx + rw + cr, Y: ry})
-		} else if cx > rx+rw {
-			obj.SetCenter(Vector2{X: rx + rw + cr, Y: cy}) // right edge
-			other.SetCenter(Vector2{X: cx - rw - cr, Y: ry})
+		// https://stackoverflow.com/questions/45370692/circle-rectangle-collision-response
+		circle := obj
+		rect := other
+		if obj.GetCollisionType() == Rectangle {
+			circle, rect = rect, circle
 		}
-		if cy < ry-rh {
-			obj.SetCenter(Vector2{X: cx, Y: ry - rh - cr}) // bottom edge
-			other.SetCenter(Vector2{X: rx, Y: cy + rh + cr})
-		} else if cy > ry+rh {
-			obj.SetCenter(Vector2{X: cx, Y: ry + rh + cr}) // top edge
-			other.SetCenter(Vector2{X: rx, Y: cy - rh - cr})
-		}
-		obj.SetCenter(Vector2{X: cdx, Y: cdy})
-		other.SetCenter(Vector2{X: rdx, Y: rdy})
 
+		NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
+		NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
+		dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
+
+		penetrationDepth := circle.GetWidth()/2 - dist.Length()
+		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
+		circle.SetCenter(circle.GetCenter().Add(penetrationVector.MulScalar(2)))
 	}
-
 }
 
 func (m *Manager) Update(dt float64) { // TODO: param of time
@@ -195,6 +172,7 @@ func (m *Manager) Update(dt float64) { // TODO: param of time
 			u2 := v2.Add(n.MulScalar(optimizedP * g.GetMass()))
 			g.SetVelocity(u1)
 			collider.SetVelocity(u2)
+
 			m.fixIntersection(g, collider)
 		}
 	}

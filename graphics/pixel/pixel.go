@@ -116,14 +116,14 @@ func (h *Handler) DrawGame(env Objecter) {
 	objects := env.Objects()
 	h.win.Clear(colornames.Black) // TODO decide color
 
-	// var sidePadding = h.cfg.Bounds.W() * 0.02
-	// var bottomPadding = h.cfg.Bounds.H() * 0.15
-	// border := imdraw.New(nil)
-	// border.Color = pixel.RGB(255, 255, 255)
-	// border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
-	// border.Push(pixel.V(h.w()-sidePadding, h.h()-sidePadding))
-	// border.Rectangle(1)
-	// border.Draw(h.win)
+	var sidePadding = h.cfg.Bounds.W() * 0.02
+	var bottomPadding = h.cfg.Bounds.H() * 0.15
+	border := imdraw.New(nil)
+	border.Color = pixel.RGB(255, 255, 255)
+	border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
+	border.Push(pixel.V(h.w()-sidePadding, h.h()-sidePadding))
+	border.Rectangle(1)
+	border.Draw(h.win)
 
 	for _, o := range objects {
 		h.drawGameObject(o)
