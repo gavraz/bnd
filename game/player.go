@@ -1,5 +1,10 @@
 package game
 
+import (
+	"fmt"
+	"time"
+)
+
 type Player struct {
 	Object
 
@@ -12,6 +17,20 @@ func NewPlayer(object Object, hp int) *Player {
 	return &Player{
 		Object: object,
 		hp:     hp,
+	}
+}
+
+func (p *Player) CastAbility(ab Ability) {
+	if ab == Speed {
+		fmt.Println(p.GetBaseSpeed(), abilitySettings["Acceleration"][ab])
+		p.SetBaseSpeed(p.GetBaseSpeed() * abilitySettings["Acceleration"][ab])
+		fmt.Println(p.GetBaseSpeed())
+		//Maybe change it later into a function which is called based on a timer
+		go func() {
+			time.Sleep(time.Duration(abilitySettings["Duration"][ab]) * time.Second)
+			p.SetBaseSpeed(p.GetBaseSpeed() / abilitySettings["Acceleration"][ab])
+			fmt.Println(p.GetBaseSpeed())
+		}()
 	}
 }
 

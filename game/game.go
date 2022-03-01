@@ -23,6 +23,28 @@ const (
 	Circle
 )
 
+// AbilitySettings : Will probably set it at server in the future side but for now just set it on client.
+type AbilitySettings map[string]map[Ability]float64
+
+var abilitySettings = AbilitySettings{
+	"Acceleration": map[Ability]float64{
+		None:   1,
+		Fire:   1,
+		Speed:  2.5,
+		Bomb:   1,
+		Oil:    1,
+		Shield: 1,
+	},
+	"Duration": map[Ability]float64{
+		None:   0,
+		Fire:   0,
+		Speed:  4.5,
+		Bomb:   3,
+		Oil:    0,
+		Shield: 7.5,
+	},
+}
+
 type Vector2 = v.Vector2
 
 type Object interface {
