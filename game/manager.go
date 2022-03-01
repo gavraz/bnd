@@ -105,7 +105,9 @@ func (m *Manager) fixIntersection(obj Object, other Object) {
 		p2 := other.GetCenter()
 		r1 := obj.GetWidth() / 2
 		r2 := other.GetWidth() / 2
-		obj.SetCenter(other.GetCenter().Add(p1.Sub(p2).Normalize().MulScalar(r1 + r2 + 1)))
+		penetrationDepth := r1 + r2 - p1.Distance(p2)
+		direction := p1.Sub(p2).Normalize()
+		obj.SetCenter(p1.Add(direction.MulScalar(penetrationDepth)))
 	}
 
 	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
@@ -119,15 +121,15 @@ func (m *Manager) fixIntersection(obj Object, other Object) {
 		yDistSquared := (p1.Y - p2.Y) * (p1.Y - p2.Y)
 		if xDistSquared > yDistSquared {
 			if p1.X > p2.X {
-				obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1 + 1, Y: obj.GetCenter().Y})
+				obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1, Y: obj.GetCenter().Y})
 			} else {
-				obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1 - 1, Y: obj.GetCenter().Y})
+				obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1, Y: obj.GetCenter().Y})
 			}
 		} else {
 			if p1.Y > p2.Y {
-				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1 + 1})
+				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1})
 			} else {
-				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1 - 1})
+				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1})
 			}
 		}
 	}
@@ -149,7 +151,7 @@ func (m *Manager) fixIntersection(obj Object, other Object) {
 	}
 }
 
-func (m *Manager) Update(dt float64) { // TODO: param of time
+func (m *Manager) Update(dt float64) {
 	for _, g := range m.objects {
 		g.UpdateVelocity(dt)
 		if collider := m.collidesWith(g); collider != nil {

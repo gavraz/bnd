@@ -1,4 +1,4 @@
-package vectorstatic
+package vector
 
 import "math"
 

@@ -38,64 +38,51 @@ func buildGameManager() *game.Manager {
 	m := game.NewManager()
 	m.Add("current-player", game.NewPlayer(&game.GObject{
 		Center: game.Vector2{
-			X: 500,
-			Y: 500,
+			X: 0,
+			Y: 0,
 		},
-		BaseSpeed:     1024,
+		BaseSpeed:     3,
 		CollisionType: game.Circle,
-		Width:         30,
-		Height:        30,
+		Width:         0.05,
+		Height:        0.05,
 		Mass:          100,
 	}, 100))
 	m.Add("crate", &game.Crate{
 		Object: &game.GObject{
 			Center: game.Vector2{
-				X: 200,
-				Y: 200,
+				X: -0.2,
+				Y: -0.2,
 			},
 			CollisionType: game.Rectangle,
-			Width:         50,
-			Height:        50,
+			Width:         0.1,
+			Height:        0.1,
 			Mass:          1,
 		},
 	})
 	m.Add("crate2", &game.Crate{
 		Object: &game.GObject{
 			Center: game.Vector2{
-				X: 300,
-				Y: 300,
+				X: -0.3,
+				Y: -0.3,
 			},
 			CollisionType: game.Rectangle,
-			Width:         50,
-			Height:        50,
+			Width:         0.1,
+			Height:        0.1,
 			Mass:          1,
 		},
 	})
 	m.Add("bouncing-ball", &game.BouncingBall{
 		Object: &game.GObject{
 			Center: game.Vector2{
-				X: 100,
-				Y: 300,
+				X: 0.1,
+				Y: 0.3,
 			},
 			CollisionType: game.Circle,
-			Width:         50,
-			Height:        50,
+			Width:         0.1,
+			Height:        0.1,
 			Mass:          1,
 		},
 	})
-	// m.Add("bottom-wall", &game.Wall{
-	// 	Object: &game.GObject{
-	// 		Center: game.Vector2{
-	// 			X: 500,
-	// 			Y: 600,
-	// 		},
-	// 		CollisionType:   game.Rectangle,
-	// 		Width:           50,
-	// 		Height:          50,
-	// 		CollisionWidth:  50,
-	// 		CollisionHeight: 50,
-	// 	},
-	// })
 
 	return m
 }
