@@ -24,8 +24,9 @@ type menuHandler interface {
 	GoBack()
 }
 
-type Objecter interface {
-	Objects() map[string]game.Object
+type Environmenter interface {
+	ForEachGameObject(do func(object game.Object))
+	HP() int
 }
 
 type Handler struct {
@@ -93,26 +94,28 @@ func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 	}
 }
 
-func (h *Handler) HandleInput(env Objecter, dt float64) {
-	playerObj := env.Objects()["current-player"]
-	vec := game.Vector2{X: 0, Y: 0}
-	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		vec.Y += (-playerObj.GetBaseSpeed() * dt)
-	}
-	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		vec.Y += (playerObj.GetBaseSpeed() * dt)
-	}
-	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		vec.X += (-playerObj.GetBaseSpeed() * dt)
-	}
-	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		vec.X += (playerObj.GetBaseSpeed() * dt)
-	}
-	playerObj.SetAcceleration(vec)
+type Mover interface {
+	MovePlayer(direction game.Direction, dt float64)
 }
 
-func (h *Handler) DrawGame(env Objecter) {
-	objects := env.Objects()
+func (h *Handler) HandleInput(m Mover, dt float64) {
+	var dir game.Direction
+	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
+		dir.Up()
+	}
+	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
+		dir.Down()
+	}
+	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
+		dir.Left()
+	}
+	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
+		dir.Right()
+	}
+	m.MovePlayer(dir, dt)
+}
+
+func (h *Handler) DrawGame(env Environmenter) {
 	h.win.Clear(colornames.Black) // TODO decide color
 
 	var sidePadding = h.w() * 0.02
@@ -124,12 +127,8 @@ func (h *Handler) DrawGame(env Objecter) {
 	border.Rectangle(1)
 	border.Draw(h.win)
 
-	for _, o := range objects {
-		h.drawGameObject(o)
-	}
-
-	player := (objects["current-player"]).(*game.Player)
-	h.drawGameBottomPanel(player.HP())
+	env.ForEachGameObject(h.drawGameObject)
+	h.drawGameBottomPanel(env.HP())
 }
 
 func (h *Handler) drawGameBottomPanel(hp int) {
@@ -151,45 +150,35 @@ func (h *Handler) toGlobalUnits(v game.Vector2) game.Vector2 {
 	return game.Vector2{X: v.X * h.w() / 2, Y: v.Y * h.h() / 2}
 }
 
-func (h *Handler) drawGameObject(object game.Object) {
-	switch object.(type) {
-	case *game.Player:
-		playerCenter := h.toGlobalSpace(object.GetCenter())
-		playerSize := h.toGlobalUnits(game.Vector2{X: object.GetWidth(), Y: object.GetHeight()})
+func (h *Handler) drawGameObject(obj game.Object) {
+	switch game.ObjectType(obj) {
+	case game.TypePlayer:
+		playerCenter := h.toGlobalSpace(obj.GetCenter())
+		playerSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
 		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
 		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
 		imd.Draw(h.win)
-	case *game.Crate:
-		crateCenter := h.toGlobalSpace(object.GetCenter())
-		crateSize := h.toGlobalUnits(game.Vector2{X: object.GetWidth(), Y: object.GetHeight()})
+	case game.TypeCrate:
+		crateCenter := h.toGlobalSpace(obj.GetCenter())
+		crateSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Cyan
 		imd.Push(pixel.V(crateCenter.X-crateSize.X/2, crateCenter.Y-crateSize.Y/2))
 		imd.Push(pixel.V(crateCenter.X+crateSize.X/2, crateCenter.Y+crateSize.Y/2))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
-	case *game.BouncingBall:
-		ballCenter := h.toGlobalSpace(object.GetCenter())
-		ballSize := h.toGlobalUnits(game.Vector2{X: object.GetWidth(), Y: object.GetHeight()})
-		imd := imdraw.New(nil)
-		imd.Color = colornames.Green
-		imd.Push(pixel.V(ballCenter.X, ballCenter.Y))
-		imd.Ellipse(pixel.Vec{X: ballSize.X / 2, Y: ballSize.Y / 2}, 0)
-		imd.Draw(h.win)
-	case *game.Wall:
-		wallCenter := h.toGlobalSpace(object.GetCenter())
-		wallSize := h.toGlobalUnits(game.Vector2{X: object.GetWidth(), Y: object.GetHeight()})
+	case game.TypeWall:
+		wallCenter := h.toGlobalSpace(obj.GetCenter())
+		wallSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Darkblue
 		imd.Push(pixel.V(wallCenter.X-wallSize.X/2, wallCenter.Y-wallSize.Y/2))
 		imd.Push(pixel.V(wallCenter.X+wallSize.X/2, wallCenter.Y+wallSize.Y/2))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
-
 	default:
-		fmt.Println("Unknown object type")
+		fmt.Println("pixel: drawing unimplemented for type")
 	}
-
 }

@@ -27,6 +27,16 @@ func (m *Manager) Add(name string, object Object) {
 	m.objects[name] = object
 }
 
+func (m *Manager) ForEachGameObject(do func(object Object)) {
+	for _, obj := range m.objects {
+		do(obj)
+	}
+}
+
+func (m *Manager) HP() int {
+	return m.objects["current-player"].(*Player).hp
+}
+
 func (m *Manager) collidesWith(obj Object) Object {
 	for _, other := range m.objects {
 		if other == obj {
@@ -228,4 +238,10 @@ func (m *Manager) Update(dt float64) {
 
 func (m *Manager) Objects() map[string]Object {
 	return m.objects // TODO safety?
+}
+
+func (m *Manager) MovePlayer(dir Direction, dt float64) {
+	playerObj := m.Objects()["current-player"]
+	curSpeed := playerObj.GetBaseSpeed()
+	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed * dt))
 }

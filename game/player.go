@@ -18,7 +18,3 @@ func NewPlayer(object Object, hp int) *Player {
 func (p *Player) SwapAbilities() {
 	p.primary, p.secondary = p.secondary, p.primary
 }
-
-func (p *Player) HP() int {
-	return p.hp
-}
