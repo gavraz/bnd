@@ -160,12 +160,10 @@ func (h *Handler) drawGameObject(object game.Object) {
 		imd.Color = colornames.Orange
 		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
 		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
-
 		imd.Draw(h.win)
 	case *game.Crate:
 		crateCenter := h.toGlobalSpace(object.GetCenter())
 		crateSize := h.toGlobalUnits(game.Vector2{X: object.GetWidth(), Y: object.GetHeight()})
-
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Cyan
 		imd.Push(pixel.V(crateCenter.X-crateSize.X/2, crateCenter.Y-crateSize.Y/2))
@@ -180,8 +178,18 @@ func (h *Handler) drawGameObject(object game.Object) {
 		imd.Push(pixel.V(ballCenter.X, ballCenter.Y))
 		imd.Ellipse(pixel.Vec{X: ballSize.X / 2, Y: ballSize.Y / 2}, 0)
 		imd.Draw(h.win)
+	case *game.Wall:
+		wallCenter := h.toGlobalSpace(object.GetCenter())
+		wallSize := h.toGlobalUnits(game.Vector2{X: object.GetWidth(), Y: object.GetHeight()})
+		imd := imdraw.New(nil)
+		imd.Color = colornames.Darkblue
+		imd.Push(pixel.V(wallCenter.X-wallSize.X/2, wallCenter.Y-wallSize.Y/2))
+		imd.Push(pixel.V(wallCenter.X+wallSize.X/2, wallCenter.Y+wallSize.Y/2))
+		imd.Rectangle(0)
+		imd.Draw(h.win)
 
 	default:
 		fmt.Println("Unknown object type")
 	}
+
 }

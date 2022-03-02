@@ -49,7 +49,7 @@ func (m *Manager) InitGame() {
 		CollisionType: Circle,
 		Width:         0.05,
 		Height:        0.05,
-		Mass:          100,
+		Mass:          2,
 	}, 100))
 	m.Add("crate", &Crate{
 		Object: &GObject{
@@ -75,7 +75,6 @@ func (m *Manager) InitGame() {
 			Mass:          1,
 		},
 	})
-
 }
 
 func (m *Manager) checkCollision(obj, other Object) Object {
@@ -90,38 +89,27 @@ func (m *Manager) checkCollision(obj, other Object) Object {
 		}
 	}
 	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Rectangle || obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Circle {
-		circle, rectangle := obj, other
+		// https://stackoverflow.com/questions/45370692/circle-rectangle-collision-response
+		circle, rect := obj, other
 		if obj.GetCollisionType() == Rectangle {
-			circle, rectangle = other, obj
-		}
-		cx := circle.GetCenter().X
-		cy := circle.GetCenter().Y
-		rx := rectangle.GetCenter().X
-		ry := rectangle.GetCenter().Y
-		rw := rectangle.GetWidth() / 2
-		rh := rectangle.GetHeight() / 2
-
-		testX := cx
-		testY := cy
-
-		if cx < rx-rw {
-			testX = rx - rw // left edge
-		} else if cx > rx+rw {
-			testX = rx + rw // right edge
-		}
-		if cy < ry-rh {
-			testY = ry - rh // bottom edge
-		} else if cy > ry+rh {
-			testY = ry + rh // top edge
+			circle, rect = other, obj
 		}
 
-		distX := cx - testX
-		distY := cy - testY
-		distanceSquared := (distX * distX) + (distY * distY)
-		radiusSquared := (circle.GetWidth() / 2) * (circle.GetWidth() / 2)
+		NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
+		NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
+		dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
 
-		if distanceSquared <= radiusSquared {
-			return other
+		penetrationDepth := circle.GetWidth()/2 - dist.Length()
+		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
+
+		if penetrationDepth > 0.0 {
+			if circle.GetVelocity().Dot(dist) < 0 {
+				tangent_vel := dist.Normalize().Dot(circle.GetVelocity())
+				combinedMass := circle.GetMass() + rect.GetMass()
+				circle.SetVelocity(circle.GetVelocity().Sub(dist.Normalize().MulScalar(tangent_vel * rect.GetMass() / combinedMass * 2)))
+				rect.SetVelocity(rect.GetVelocity().Add(dist.Normalize().MulScalar(tangent_vel * circle.GetMass() / combinedMass * 2)))
+			}
+			circle.SetCenter(circle.GetCenter().Add(penetrationVector))
 		}
 	}
 	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
@@ -131,8 +119,23 @@ func (m *Manager) checkCollision(obj, other Object) Object {
 		h1 := obj.GetHeight() / 2
 		w2 := other.GetWidth() / 2
 		h2 := other.GetHeight() / 2
-		if p1.X-w1 < p2.X+w2 && p1.X+w1 > p2.X-w2 && p1.Y-h1 < p2.Y+h2 && p1.Y+h1 > p2.Y-h2 {
-			return other
+		if p1.X-w1 <= p2.X+w2 && p1.X+w1 >= p2.X-w2 && p1.Y-h1 <= p2.Y+h2 && p1.Y+h1 >= p2.Y-h2 {
+			xDistSquared := (p1.X - p2.X) * (p1.X - p2.X)
+			yDistSquared := (p1.Y - p2.Y) * (p1.Y - p2.Y)
+			if xDistSquared > yDistSquared {
+				if p1.X > p2.X {
+					obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1, Y: obj.GetCenter().Y})
+				} else {
+					obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1, Y: obj.GetCenter().Y})
+				}
+			} else {
+				if p1.Y > p2.Y {
+					obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1})
+				} else {
+					obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1})
+				}
+			}
+
 		}
 	}
 	return nil
@@ -180,49 +183,46 @@ func (m *Manager) fixIntersection(obj Object, other Object) {
 			circle, rect = rect, circle
 		}
 
+		r1 := circle.GetCenter()
+		r2 := rect.GetCenter()
+		n := r1.Sub(r2).Normalize()
+		v1 := circle.GetVelocity()
+		v2 := rect.GetVelocity()
+		a1 := v1.Dot(n)
+		a2 := v2.Dot(n)
+		// Using the optimized version,
+		// optimizedP =  2(a1 - a2)
+		//              -----------
+		//                m1 + m2
+		optimizedP := (2.0 * (a1 - a2)) / (circle.GetMass() + rect.GetMass())
+		u1 := v1.Sub(n.MulScalar(optimizedP * rect.GetMass()))
+		u2 := v2.Add(n.MulScalar(optimizedP * circle.GetMass()))
+		circle.SetVelocity(u1)
+		rect.SetVelocity(u2)
+
 		NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
 		NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
 		dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
 
 		penetrationDepth := circle.GetWidth()/2 - dist.Length()
 		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
-		circle.SetCenter(circle.GetCenter().Add(penetrationVector.MulScalar(2)))
+		circle.SetCenter(circle.GetCenter().Add(penetrationVector))
 	}
 }
 
 func (m *Manager) Update(dt float64) {
 	for _, g := range m.objects {
 		g.UpdateVelocity(dt)
-		if collider := m.collidesWith(g); collider != nil {
-			fmt.Println("Collision detected: ", g.GetCenter(), collider.GetCenter())
-			// Momentum and impulse calculations
-			// https://www.gamasutra.com/view/feature/3015/pool_hall_lessons_fast_accurate_.php?page=3
-			r1 := g.GetCenter()
-			r2 := collider.GetCenter()
-			n := r1.Sub(r2).Normalize()
-			v1 := g.GetVelocity()
-			v2 := collider.GetVelocity()
-			a1 := v1.Dot(n)
-			a2 := v2.Dot(n)
-			// Using the optimized version,
-			// optimizedP =  2(a1 - a2)
-			//              -----------
-			//                m1 + m2
-			optimizedP := (2.0 * (a1 - a2)) / (g.GetMass() + collider.GetMass())
-			u1 := v1.Sub(n.MulScalar(optimizedP * collider.GetMass()))
-			u2 := v2.Add(n.MulScalar(optimizedP * g.GetMass()))
-			g.SetVelocity(u1)
-			collider.SetVelocity(u2)
-
-			m.fixIntersection(g, collider)
-		}
-	}
-	for _, g := range m.objects {
 		g.SetCenter(g.GetCenter().Add(g.GetVelocity()))
+		//g.applyFriction(playerVelocityDecay, dt)
 		g.SetVelocity(Vector2{
 			X: g.GetVelocity().X - g.GetVelocity().X*playerVelocityDecay*dt,
 			Y: g.GetVelocity().Y - g.GetVelocity().Y*playerVelocityDecay*dt,
 		})
+
+		if collider := m.collidesWith(g); collider != nil {
+			fmt.Println("Collision detected: ", g.GetCenter(), collider.GetCenter())
+		}
 	}
 }
 
