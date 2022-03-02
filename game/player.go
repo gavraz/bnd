@@ -22,12 +22,3 @@ func (p *Player) SwapAbilities() {
 func (p *Player) HP() int {
 	return p.hp
 }
-
-func (m *Manager) MovePlayer(dirX float64, dirY float64, dt float64) {
-	vec := Vector2{X: 0, Y: 0}
-	playerObj := m.Objects()["current-player"]
-	curSpeed := playerObj.GetBaseSpeed()
-	vec.Y += dirY * curSpeed * dt
-	vec.X += dirX * curSpeed * dt
-	playerObj.SetAcceleration(vec)
-}

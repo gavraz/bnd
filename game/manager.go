@@ -188,3 +188,9 @@ func (m *Manager) Update(dt float64) { // TODO: param of time
 func (m *Manager) Objects() map[string]Object {
 	return m.objects // TODO safety?
 }
+
+func (m *Manager) MovePlayer(dir Direction, dt float64) {
+	playerObj := m.Objects()["current-player"]
+	curSpeed := playerObj.GetBaseSpeed()
+	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed * dt))
+}

@@ -95,24 +95,24 @@ func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 }
 
 type Mover interface {
-	MovePlayer(dirX float64, dirY float64, dt float64)
+	MovePlayer(direction game.Direction, dt float64)
 }
 
 func (h *Handler) HandleInput(m Mover, dt float64) {
-	var x, y float64
-	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		y = -1.0
-	}
+	var dir game.Direction
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		y = 1.0
+		dir.Up()
+	}
+	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
+		dir.Down()
 	}
 	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		x = -1.0
+		dir.Left()
 	}
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		x = 1.0
+		dir.Right()
 	}
-	m.MovePlayer(x, y, dt)
+	m.MovePlayer(dir, dt)
 }
 
 func (h *Handler) DrawGame(env Objecter) {
