@@ -119,17 +119,3 @@ func (g *GObject) GetMass() float64 {
 func (g *GObject) ApplyFriction(friction, dt float64) {
 	g.Velocity = g.Velocity.MulScalar(1 - friction*dt)
 }
-
-type Crate struct {
-	Object
-
-	ability Ability
-}
-
-type Wall struct {
-	Object
-}
-
-type Bullet struct {
-	Object
-}

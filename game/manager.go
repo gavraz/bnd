@@ -34,7 +34,7 @@ func (m *Manager) ForEachGameObject(do func(object Object)) {
 }
 
 func (m *Manager) HP() int {
-	return m.objects["current-player"].(*Player).hp
+	return m.objects["current-player"].(*player).hp
 }
 
 func (m *Manager) collidesWith(obj Object) Object {
@@ -61,7 +61,7 @@ func (m *Manager) InitGame() {
 		Height:        0.05,
 		Mass:          2,
 	}, 100))
-	m.Add("crate", &Crate{
+	m.Add("crate", &crate{
 		Object: &GObject{
 			Center: Vector2{
 				X: -0.2,
@@ -73,7 +73,7 @@ func (m *Manager) InitGame() {
 			Mass:          1,
 		},
 	})
-	m.Add("crate2", &Crate{
+	m.Add("crate2", &crate{
 		Object: &GObject{
 			Center: Vector2{
 				X: -0.3,
