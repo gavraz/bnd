@@ -94,22 +94,25 @@ func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
 	}
 }
 
-func (h *Handler) HandleInput(env Objecter, dt float64) {
-	playerObj := env.Objects()["current-player"]
-	vec := game.Vector2{X: 0, Y: 0}
+type Mover interface {
+	MovePlayer(dirX float64, dirY float64, dt float64)
+}
+
+func (h *Handler) HandleInput(m Mover, dt float64) {
+	var x, y float64
 	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		vec.Y += (-playerObj.GetBaseSpeed() * dt)
+		y = -1.0
 	}
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		vec.Y += (playerObj.GetBaseSpeed() * dt)
+		y = 1.0
 	}
 	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		vec.X += (-playerObj.GetBaseSpeed() * dt)
+		x = -1.0
 	}
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		vec.X += (playerObj.GetBaseSpeed() * dt)
+		x = 1.0
 	}
-	playerObj.SetAcceleration(vec)
+	m.MovePlayer(x, y, dt)
 }
 
 func (h *Handler) DrawGame(env Objecter) {
