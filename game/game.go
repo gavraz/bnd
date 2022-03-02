@@ -124,7 +124,3 @@ type Crate struct {
 type Bullet struct {
 	Object
 }
-
-type BouncingBall struct {
-	Object
-}

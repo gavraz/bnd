@@ -24,8 +24,9 @@ type menuHandler interface {
 	GoBack()
 }
 
-type Objecter interface {
-	Objects() map[string]game.Object
+type Environmenter interface {
+	ForEachGameObject(do func(object game.Object))
+	HP() int
 }
 
 type Handler struct {
@@ -115,8 +116,7 @@ func (h *Handler) HandleInput(m Mover, dt float64) {
 	m.MovePlayer(dir, dt)
 }
 
-func (h *Handler) DrawGame(env Objecter) {
-	objects := env.Objects()
+func (h *Handler) DrawGame(env Environmenter) {
 	h.win.Clear(colornames.Black) // TODO decide color
 
 	var sidePadding = h.cfg.Bounds.W() * 0.02
@@ -128,12 +128,8 @@ func (h *Handler) DrawGame(env Objecter) {
 	border.Rectangle(1)
 	border.Draw(h.win)
 
-	for _, o := range objects {
-		h.drawGameObject(o)
-	}
-
-	player := (objects["current-player"]).(*game.Player)
-	h.drawGameBottomPanel(player.HP())
+	env.ForEachGameObject(h.drawGameObject)
+	h.drawGameBottomPanel(env.HP())
 }
 
 func (h *Handler) drawGameBottomPanel(hp int) {
@@ -143,29 +139,22 @@ func (h *Handler) drawGameBottomPanel(hp int) {
 	basicTxt.Draw(h.win, pixel.IM.Scaled(basicTxt.Orig, 2.5))
 }
 
-func (h *Handler) drawGameObject(object game.Object) {
-	switch object.(type) {
-	case *game.Player:
+func (h *Handler) drawGameObject(obj game.Object) {
+	switch game.ObjectType(obj) {
+	case game.TypePlayer:
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
-		imd.Push(pixel.V(float64(object.GetCenter().X), float64(object.GetCenter().Y)))
-		imd.Circle(object.GetWidth()/2, 0)
+		imd.Push(pixel.V(float64(obj.GetCenter().X), float64(obj.GetCenter().Y)))
+		imd.Circle(obj.GetWidth()/2, 0)
 		imd.Draw(h.win)
-	case *game.Crate:
+	case game.TypeCrate:
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Cyan
-		imd.Push(pixel.V(float64(object.GetCenter().X-object.GetWidth()/2), float64(object.GetCenter().Y-object.GetHeight()/2)))
-		imd.Push(pixel.V(float64(object.GetCenter().X+object.GetWidth()/2), float64(object.GetCenter().Y+object.GetHeight()/2)))
+		imd.Push(pixel.V(float64(obj.GetCenter().X-obj.GetWidth()/2), float64(obj.GetCenter().Y-obj.GetHeight()/2)))
+		imd.Push(pixel.V(float64(obj.GetCenter().X+obj.GetWidth()/2), float64(obj.GetCenter().Y+obj.GetHeight()/2)))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
-	case *game.BouncingBall:
-		imd := imdraw.New(nil)
-		imd.Color = colornames.Green
-		imd.Push(pixel.V(float64(object.GetCenter().X), float64(object.GetCenter().Y)))
-		imd.Circle(object.GetWidth()/2, 0)
-		imd.Draw(h.win)
-
 	default:
-		fmt.Println("Unknown object type")
+		fmt.Println("pixel: drawing unimplemented for type")
 	}
 }

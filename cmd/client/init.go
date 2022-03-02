@@ -71,31 +71,6 @@ func buildGameManager() *game.Manager {
 			Mass:          1,
 		},
 	})
-	m.Add("bouncing-ball", &game.BouncingBall{
-		Object: &game.GObject{
-			Center: game.Vector2{
-				X: 100,
-				Y: 300,
-			},
-			CollisionType: game.Circle,
-			Width:         50,
-			Height:        50,
-			Mass:          1,
-		},
-	})
-	// m.Add("bottom-wall", &game.Wall{
-	// 	Object: &game.GObject{
-	// 		Center: game.Vector2{
-	// 			X: 500,
-	// 			Y: 600,
-	// 		},
-	// 		CollisionType:   game.Rectangle,
-	// 		Width:           50,
-	// 		Height:          50,
-	// 		CollisionWidth:  50,
-	// 		CollisionHeight: 50,
-	// 	},
-	// })
 
 	return m
 }

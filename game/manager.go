@@ -27,6 +27,16 @@ func (m *Manager) Add(name string, object Object) {
 	m.objects[name] = object
 }
 
+func (m *Manager) ForEachGameObject(do func(object Object)) {
+	for _, obj := range m.objects {
+		do(obj)
+	}
+}
+
+func (m *Manager) HP() int {
+	return m.objects["current-player"].(*Player).hp
+}
+
 func (m *Manager) collidesWith(obj Object) Object {
 	for _, other := range m.objects {
 		if other == obj {
