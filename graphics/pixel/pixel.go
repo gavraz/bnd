@@ -30,17 +30,16 @@ type Environmenter interface {
 }
 
 type Handler struct {
-	cfg pixelgl.WindowConfig
 	win *pixelgl.Window
 }
 
-func New(cfg pixelgl.WindowConfig) *Handler {
-	return &Handler{cfg: cfg}
+func New() *Handler {
+	return &Handler{}
 }
 
-func (h *Handler) Init() {
+func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	var err error
-	h.win, err = pixelgl.NewWindow(h.cfg)
+	h.win, err = pixelgl.NewWindow(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -55,11 +54,11 @@ func (h *Handler) Update() {
 }
 
 func (h *Handler) w() float64 {
-	return h.cfg.Bounds.W()
+	return h.win.Bounds().W()
 }
 
 func (h *Handler) h() float64 {
-	return h.cfg.Bounds.H()
+	return h.win.Bounds().H()
 }
 
 func (h *Handler) DrawMenu(c choicer) {
@@ -119,8 +118,8 @@ func (h *Handler) HandleInput(m Mover, dt float64) {
 func (h *Handler) DrawGame(env Environmenter) {
 	h.win.Clear(colornames.Black) // TODO decide color
 
-	var sidePadding = h.cfg.Bounds.W() * 0.02
-	var bottomPadding = h.cfg.Bounds.H() * 0.15
+	var sidePadding = h.w() * 0.02
+	var bottomPadding = h.h() * 0.15
 	border := imdraw.New(nil)
 	border.Color = pixel.RGB(255, 255, 255)
 	border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
@@ -139,19 +138,44 @@ func (h *Handler) drawGameBottomPanel(hp int) {
 	basicTxt.Draw(h.win, pixel.IM.Scaled(basicTxt.Orig, 2.5))
 }
 
+func (h *Handler) toLocalSpace(v game.Vector2) game.Vector2 {
+	return game.Vector2{X: v.X/h.w()*2 - 1, Y: v.Y/h.h()*2 - 1}
+}
+
+func (h *Handler) toGlobalSpace(v game.Vector2) game.Vector2 {
+	return game.Vector2{X: (v.X + 1) * h.w() / 2, Y: (v.Y + 1) * h.h() / 2}
+}
+
+func (h *Handler) toGlobalUnits(v game.Vector2) game.Vector2 {
+	return game.Vector2{X: v.X * h.w() / 2, Y: v.Y * h.h() / 2}
+}
+
 func (h *Handler) drawGameObject(obj game.Object) {
 	switch game.ObjectType(obj) {
 	case game.TypePlayer:
+		playerCenter := h.toGlobalSpace(obj.GetCenter())
+		playerSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
-		imd.Push(pixel.V(float64(obj.GetCenter().X), float64(obj.GetCenter().Y)))
-		imd.Circle(obj.GetWidth()/2, 0)
+		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
+		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
 		imd.Draw(h.win)
 	case game.TypeCrate:
+		crateCenter := h.toGlobalSpace(obj.GetCenter())
+		crateSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Cyan
-		imd.Push(pixel.V(float64(obj.GetCenter().X-obj.GetWidth()/2), float64(obj.GetCenter().Y-obj.GetHeight()/2)))
-		imd.Push(pixel.V(float64(obj.GetCenter().X+obj.GetWidth()/2), float64(obj.GetCenter().Y+obj.GetHeight()/2)))
+		imd.Push(pixel.V(crateCenter.X-crateSize.X/2, crateCenter.Y-crateSize.Y/2))
+		imd.Push(pixel.V(crateCenter.X+crateSize.X/2, crateCenter.Y+crateSize.Y/2))
+		imd.Rectangle(0)
+		imd.Draw(h.win)
+	case game.TypeWall:
+		wallCenter := h.toGlobalSpace(obj.GetCenter())
+		wallSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		imd := imdraw.New(nil)
+		imd.Color = colornames.Darkblue
+		imd.Push(pixel.V(wallCenter.X-wallSize.X/2, wallCenter.Y-wallSize.Y/2))
+		imd.Push(pixel.V(wallCenter.X+wallSize.X/2, wallCenter.Y+wallSize.Y/2))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
 	default:

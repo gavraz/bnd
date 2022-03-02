@@ -36,41 +36,7 @@ func buildMenuHandler() *menu.Handler {
 
 func buildGameManager() *game.Manager {
 	m := game.NewManager()
-	m.Add("current-player", game.NewPlayer(&game.GObject{
-		Center: game.Vector2{
-			X: 500,
-			Y: 500,
-		},
-		BaseSpeed:     1024,
-		CollisionType: game.Circle,
-		Width:         30,
-		Height:        30,
-		Mass:          100,
-	}, 100))
-	m.Add("crate", &game.Crate{
-		Object: &game.GObject{
-			Center: game.Vector2{
-				X: 200,
-				Y: 200,
-			},
-			CollisionType: game.Rectangle,
-			Width:         50,
-			Height:        50,
-			Mass:          1,
-		},
-	})
-	m.Add("crate2", &game.Crate{
-		Object: &game.GObject{
-			Center: game.Vector2{
-				X: 300,
-				Y: 300,
-			},
-			CollisionType: game.Rectangle,
-			Width:         50,
-			Height:        50,
-			Mass:          1,
-		},
-	})
+	m.InitGame()
 
 	return m
 }
