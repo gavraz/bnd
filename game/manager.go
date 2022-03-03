@@ -20,11 +20,11 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) AddDynamicObj(name string, object DynamicObject) {
+func (m *Manager) AddDynamicObject(name string, object DynamicObject) {
 	m.dynamicObjects[name] = object
 }
 
-func (m *Manager) AddStaticObj(name string, object StaticObject) {
+func (m *Manager) AddStaticObject(name string, object StaticObject) {
 	m.staticObjects[name] = object
 }
 
@@ -63,7 +63,7 @@ func (m *Manager) resolveStaticCollisions(obj DynamicObject) Object {
 }
 
 func (m *Manager) InitGame() {
-	m.AddDynamicObj("current-player", NewPlayer(&GObject{
+	m.AddDynamicObject("current-player", NewPlayer(&GObject{
 		Center: Vector2{
 			X: 0,
 			Y: 0,
@@ -74,7 +74,7 @@ func (m *Manager) InitGame() {
 		Height:        0.05,
 		Mass:          2,
 	}, 100))
-	m.AddDynamicObj("crate", &crate{
+	m.AddDynamicObject("crate", &crate{
 		DynamicObject: &GObject{
 			Center: Vector2{
 				X: -0.2,
@@ -86,7 +86,7 @@ func (m *Manager) InitGame() {
 			Mass:          1,
 		},
 	})
-	m.AddDynamicObj("crate2", &crate{
+	m.AddDynamicObject("crate2", &crate{
 		DynamicObject: &GObject{
 			Center: Vector2{
 				X: -0.3,
@@ -115,16 +115,8 @@ func (m *Manager) Update(dt float64) {
 	}
 }
 
-func (m *Manager) DynamicObjects() map[string]DynamicObject {
-	return m.dynamicObjects // TODO safety?
-}
-
-func (m *Manager) StaticObjects() map[string]StaticObject {
-	return m.staticObjects
-}
-
 func (m *Manager) MovePlayer(dir Direction, dt float64) {
-	playerObj := m.DynamicObjects()["current-player"]
+	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
 	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed * dt))
 }
