@@ -152,7 +152,7 @@ func (h *Handler) toGlobalUnits(v game.Vector2) game.Vector2 {
 
 func (h *Handler) drawGameObject(obj game.Object) {
 	switch game.ObjectType(obj) {
-	case game.TypePlayer:
+	case game.Player:
 		playerCenter := h.toGlobalSpace(obj.GetCenter())
 		playerSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
@@ -160,7 +160,7 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
 		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
 		imd.Draw(h.win)
-	case game.TypeCrate:
+	case game.Crate:
 		crateCenter := h.toGlobalSpace(obj.GetCenter())
 		crateSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
@@ -169,7 +169,7 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Push(pixel.V(crateCenter.X+crateSize.X/2, crateCenter.Y+crateSize.Y/2))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
-	case game.TypeWall:
+	case game.Wall:
 		wallCenter := h.toGlobalSpace(obj.GetCenter())
 		wallSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)

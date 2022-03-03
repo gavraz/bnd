@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	playerVelocityDecay = 3.0
+	playerVelocityDecay = 4.0
 )
 
 type Manager struct {
@@ -38,7 +38,7 @@ func (m *Manager) ForEachGameObject(do func(object Object)) {
 }
 
 func (m *Manager) HP() int {
-	return m.dynamicObjects["current-player"].(*Player).hp
+	return m.dynamicObjects["current-player"].(*player).hp
 }
 
 func (m *Manager) resolveDynamicCollisions(obj DynamicObject) Object {
@@ -74,7 +74,7 @@ func (m *Manager) InitGame() {
 		Height:        0.05,
 		Mass:          2,
 	}, 100))
-	m.AddDynamicObj("crate", &Crate{
+	m.AddDynamicObj("crate", &crate{
 		DynamicObject: &GObject{
 			Center: Vector2{
 				X: -0.2,
@@ -86,7 +86,7 @@ func (m *Manager) InitGame() {
 			Mass:          1,
 		},
 	})
-	m.AddDynamicObj("crate2", &Crate{
+	m.AddDynamicObj("crate2", &crate{
 		DynamicObject: &GObject{
 			Center: Vector2{
 				X: -0.3,

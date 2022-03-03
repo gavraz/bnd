@@ -1,21 +1,21 @@
 package game
 
-type objectType int
+type ObjType int
 
 const (
-	TypePlayer objectType = iota
-	TypeCrate
-	TypeWall
+	Player ObjType = iota
+	Crate
+	Wall
 )
 
-func ObjectType(object Object) objectType {
+func ObjectType(object Object) ObjType {
 	switch object.(type) {
-	case *Player:
-		return TypePlayer
-	case *Crate:
-		return TypeCrate
-	case *Wall:
-		return TypeWall
+	case *player:
+		return Player
+	case *crate:
+		return Crate
+	case *wall:
+		return Wall
 	default:
 		panic("unknown object type")
 	}
