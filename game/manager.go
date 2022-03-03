@@ -74,8 +74,8 @@ func (m *Manager) InitGame() {
 		Height:        0.05,
 		Mass:          2,
 	}, 100))
-	m.Add("crate", &Crate{
-		Object: &GObject{
+	m.AddDynamicObj("crate", &Crate{
+		DynamicObject: &GObject{
 			Center: Vector2{
 				X: -0.2,
 				Y: -0.2,
