@@ -168,9 +168,6 @@ func CheckStaticCollision(obj DynamicObject, other StaticObject) Object {
 			// No collision
 			return nil
 		} else {
-			println(w1/2, w2/2)
-			println(p1.X, p2.X)
-
 			// Collision
 			overlapX := math.Min(p1.X+w1/2, p2.X+w2/2) - math.Max(p1.X-w1/2, p2.X-w2/2)
 			overlapY := math.Min(p1.Y+h1/2, p2.Y+h2/2) - math.Max(p1.Y-h1/2, p2.Y-h2/2)
