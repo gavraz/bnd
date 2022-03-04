@@ -97,7 +97,7 @@ func (m *Manager) InitGame() {
 	m.AddDynamicObject("crate2", &crate{
 		DynamicObject: &GObject{
 			Center: Vector2{
-				X: -0.4,
+				X: -0.6,
 				Y: -0.5,
 			},
 			CollisionType: Rectangle,
@@ -106,6 +106,51 @@ func (m *Manager) InitGame() {
 			Mass:          10,
 		},
 	})
+	m.AddStaticObject("wall-bottom", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: 0,
+				Y: -0.83,
+			},
+			CollisionType: Rectangle,
+			Width:         1.92,
+			Height:        0.34,
+		},
+	})
+	m.AddStaticObject("wall-left", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: -0.98,
+				Y: 0,
+			},
+			CollisionType: Rectangle,
+			Width:         0.04,
+			Height:        2,
+		},
+	})
+	m.AddStaticObject("wall-right", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: 0.98,
+				Y: 0,
+			},
+			CollisionType: Rectangle,
+			Width:         0.04,
+			Height:        2,
+		},
+	})
+	m.AddStaticObject("wall-top", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: 0,
+				Y: 0.98,
+			},
+			CollisionType: Rectangle,
+			Width:         1.92,
+			Height:        0.04,
+		},
+	})
+
 }
 
 func (m *Manager) Update(dt float64) {

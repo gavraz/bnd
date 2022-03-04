@@ -61,7 +61,7 @@ func CheckDynamicCollision(obj, other DynamicObject) Object {
 		// then move the rectangles apart by the penetration vector
 		// return the other rectangle
 		p1, p2 := obj.GetCenter(), other.GetCenter()
-		w1, w2 := obj.GetWidth(), other.GetHeight()
+		w1, w2 := obj.GetWidth(), other.GetWidth()
 		h1, h2 := obj.GetHeight(), other.GetHeight()
 		v1, v2 := obj.GetVelocity(), other.GetVelocity()
 		m1, m2 := obj.GetMass(), other.GetMass()
@@ -161,13 +161,16 @@ func CheckStaticCollision(obj DynamicObject, other StaticObject) Object {
 
 	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
 		p1, p2 := obj.GetCenter(), other.GetCenter()
-		w1, w2 := obj.GetWidth(), other.GetHeight()
+		w1, w2 := obj.GetWidth(), other.GetWidth()
 		h1, h2 := obj.GetHeight(), other.GetHeight()
 		v1 := obj.GetVelocity()
 		if p1.X+w1/2 < p2.X-w2/2 || p1.X-w1/2 > p2.X+w2/2 || p1.Y+h1/2 < p2.Y-h2/2 || p1.Y-h1/2 > p2.Y+h2/2 {
 			// No collision
 			return nil
 		} else {
+			println(w1/2, w2/2)
+			println(p1.X, p2.X)
+
 			// Collision
 			overlapX := math.Min(p1.X+w1/2, p2.X+w2/2) - math.Max(p1.X-w1/2, p2.X-w2/2)
 			overlapY := math.Min(p1.Y+h1/2, p2.Y+h2/2) - math.Max(p1.Y-h1/2, p2.Y-h2/2)
