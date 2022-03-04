@@ -1,8 +1,6 @@
 package game
 
-import (
-	"fmt"
-)
+import "fmt"
 
 const (
 	playerVelocityDecay = 4.0
@@ -74,6 +72,16 @@ func (m *Manager) InitGame() {
 		Height:        0.05,
 		Mass:          2,
 	}, 100))
+	m.AddStaticObject("enemy-player", NewPlayer(&GObject{
+		Center: Vector2{
+			X: 0.2,
+			Y: 0.3,
+		},
+		BaseSpeed:     3,
+		CollisionType: Circle,
+		Width:         0.2,
+		Height:        0.2,
+	}, 100))
 	m.AddDynamicObject("crate", &crate{
 		DynamicObject: &GObject{
 			Center: Vector2{
@@ -89,13 +97,13 @@ func (m *Manager) InitGame() {
 	m.AddDynamicObject("crate2", &crate{
 		DynamicObject: &GObject{
 			Center: Vector2{
-				X: -0.3,
-				Y: -0.3,
+				X: -0.4,
+				Y: -0.5,
 			},
 			CollisionType: Rectangle,
-			Width:         0.1,
-			Height:        0.1,
-			Mass:          1,
+			Width:         0.2,
+			Height:        0.2,
+			Mass:          10,
 		},
 	})
 }
