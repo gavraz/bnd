@@ -29,15 +29,22 @@ type Object interface {
 	GetCollisionType() CollisionTypes
 	GetCenter() Vector2
 	SetCenter(p Vector2)
-	GetDirection() Vector2
-	SetDirection(d Vector2)
-	GetVelocity() Vector2
-	SetVelocity(v Vector2)
-	UpdateVelocity(dt float64)
-	GetAcceleration() Vector2
-	SetAcceleration(a Vector2)
 	GetWidth() float64
 	GetHeight() float64
+}
+
+type StaticObject interface {
+	Object
+}
+
+type DynamicObject interface {
+	Object
+	GetVelocity() Vector2
+	SetVelocity(v Vector2)
+	GetAcceleration() Vector2
+	SetAcceleration(a Vector2)
+	UpdateVelocity(dt float64)
+	MoveObject()
 	GetBaseSpeed() float64
 	SetBaseSpeed(s float64)
 	GetMass() float64
@@ -94,6 +101,10 @@ func (g *GObject) GetAcceleration() Vector2 {
 
 func (g *GObject) UpdateVelocity(dt float64) {
 	g.Velocity = g.Velocity.Add(g.Acceleration.MulScalar(dt))
+}
+
+func (g *GObject) MoveObject() {
+	g.Center = g.Center.Add(g.Velocity)
 }
 
 func (g *GObject) SetVelocity(a Vector2) {

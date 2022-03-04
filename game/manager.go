@@ -1,48 +1,59 @@
 package game
 
-import (
-	"fmt"
-	"math"
-)
+import "fmt"
 
 const (
 	playerVelocityDecay = 4.0
 )
 
 type Manager struct {
-	objects map[string]Object
+	dynamicObjects map[string]DynamicObject
+	staticObjects  map[string]StaticObject
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		objects: make(map[string]Object),
+		dynamicObjects: make(map[string]DynamicObject),
+		staticObjects:  make(map[string]StaticObject),
 	}
 }
 
-func (m *Manager) SetDirection(name string, direction Vector2) {
-	m.objects[name].SetDirection(direction)
+func (m *Manager) AddDynamicObject(name string, object DynamicObject) {
+	m.dynamicObjects[name] = object
 }
 
-func (m *Manager) Add(name string, object Object) {
-	m.objects[name] = object
+func (m *Manager) AddStaticObject(name string, object StaticObject) {
+	m.staticObjects[name] = object
 }
 
 func (m *Manager) ForEachGameObject(do func(object Object)) {
-	for _, obj := range m.objects {
+	for _, obj := range m.dynamicObjects {
+		do(obj)
+	}
+	for _, obj := range m.staticObjects {
 		do(obj)
 	}
 }
 
 func (m *Manager) HP() int {
-	return m.objects["current-player"].(*player).hp
+	return m.dynamicObjects["current-player"].(*player).hp
 }
 
-func (m *Manager) collidesWith(obj Object) Object {
-	for _, other := range m.objects {
+func (m *Manager) resolveDynamicCollisions(obj DynamicObject) Object {
+	for _, other := range m.dynamicObjects {
 		if other == obj {
 			continue
 		}
-		if collider := m.checkCollision(obj, other); collider != nil {
+		if collider := CheckDynamicCollision(obj, other); collider != nil {
+			return collider
+		}
+	}
+	return nil
+}
+
+func (m *Manager) resolveStaticCollisions(obj DynamicObject) Object {
+	for _, other := range m.staticObjects {
+		if collider := CheckStaticCollision(obj, other); collider != nil {
 			return collider
 		}
 	}
@@ -50,7 +61,7 @@ func (m *Manager) collidesWith(obj Object) Object {
 }
 
 func (m *Manager) InitGame() {
-	m.Add("current-player", NewPlayer(&GObject{
+	m.AddDynamicObject("current-player", NewPlayer(&GObject{
 		Center: Vector2{
 			X: 0,
 			Y: 0,
@@ -61,8 +72,18 @@ func (m *Manager) InitGame() {
 		Height:        0.05,
 		Mass:          2,
 	}, 100))
-	m.Add("crate", &crate{
-		Object: &GObject{
+	m.AddStaticObject("enemy-player", NewPlayer(&GObject{
+		Center: Vector2{
+			X: 0.2,
+			Y: 0.3,
+		},
+		BaseSpeed:     3,
+		CollisionType: Circle,
+		Width:         0.2,
+		Height:        0.2,
+	}, 100))
+	m.AddDynamicObject("crate", &crate{
+		DynamicObject: &GObject{
 			Center: Vector2{
 				X: -0.2,
 				Y: -0.2,
@@ -73,175 +94,82 @@ func (m *Manager) InitGame() {
 			Mass:          1,
 		},
 	})
-	m.Add("crate2", &crate{
-		Object: &GObject{
+	m.AddDynamicObject("crate2", &crate{
+		DynamicObject: &GObject{
 			Center: Vector2{
-				X: -0.3,
-				Y: -0.3,
+				X: -0.6,
+				Y: -0.5,
 			},
 			CollisionType: Rectangle,
-			Width:         0.1,
-			Height:        0.1,
-			Mass:          1,
+			Width:         0.2,
+			Height:        0.2,
+			Mass:          10,
 		},
 	})
-}
+	m.AddStaticObject("wall-bottom", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: 0,
+				Y: -0.83,
+			},
+			CollisionType: Rectangle,
+			Width:         1.92,
+			Height:        0.34,
+		},
+	})
+	m.AddStaticObject("wall-left", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: -0.98,
+				Y: 0,
+			},
+			CollisionType: Rectangle,
+			Width:         0.04,
+			Height:        2,
+		},
+	})
+	m.AddStaticObject("wall-right", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: 0.98,
+				Y: 0,
+			},
+			CollisionType: Rectangle,
+			Width:         0.04,
+			Height:        2,
+		},
+	})
+	m.AddStaticObject("wall-top", &wall{
+		StaticObject: &GObject{
+			Center: Vector2{
+				X: 0,
+				Y: 0.98,
+			},
+			CollisionType: Rectangle,
+			Width:         1.92,
+			Height:        0.04,
+		},
+	})
 
-func (m *Manager) checkCollision(obj, other Object) Object {
-	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
-		p1 := obj.GetCenter()
-		p2 := other.GetCenter()
-		r1 := obj.GetWidth() / 2
-		r2 := other.GetWidth() / 2
-		dist := p1.Distance(p2)
-		if dist <= r1+r2 {
-			return other
-		}
-	}
-	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Rectangle || obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Circle {
-		// https://stackoverflow.com/questions/45370692/circle-rectangle-collision-response
-		circle, rect := obj, other
-		if obj.GetCollisionType() == Rectangle {
-			circle, rect = other, obj
-		}
-
-		NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
-		NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
-		dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
-
-		penetrationDepth := circle.GetWidth()/2 - dist.Length()
-		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
-
-		if penetrationDepth > 0.0 {
-			if circle.GetVelocity().Dot(dist) < 0 {
-				tangent_vel := dist.Normalize().Dot(circle.GetVelocity())
-				combinedMass := circle.GetMass() + rect.GetMass()
-				circle.SetVelocity(circle.GetVelocity().Sub(dist.Normalize().MulScalar(tangent_vel * rect.GetMass() / combinedMass * 2)))
-				rect.SetVelocity(rect.GetVelocity().Add(dist.Normalize().MulScalar(tangent_vel * circle.GetMass() / combinedMass * 2)))
-			}
-			circle.SetCenter(circle.GetCenter().Add(penetrationVector))
-		}
-	}
-	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
-		p1 := obj.GetCenter()
-		p2 := other.GetCenter()
-		w1 := obj.GetWidth() / 2
-		h1 := obj.GetHeight() / 2
-		w2 := other.GetWidth() / 2
-		h2 := other.GetHeight() / 2
-		if p1.X-w1 <= p2.X+w2 && p1.X+w1 >= p2.X-w2 && p1.Y-h1 <= p2.Y+h2 && p1.Y+h1 >= p2.Y-h2 {
-			xDistSquared := (p1.X - p2.X) * (p1.X - p2.X)
-			yDistSquared := (p1.Y - p2.Y) * (p1.Y - p2.Y)
-			if xDistSquared > yDistSquared {
-				if p1.X > p2.X {
-					obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1, Y: obj.GetCenter().Y})
-				} else {
-					obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1, Y: obj.GetCenter().Y})
-				}
-			} else {
-				if p1.Y > p2.Y {
-					obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1})
-				} else {
-					obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1})
-				}
-			}
-
-		}
-	}
-	return nil
-}
-
-func (m *Manager) fixIntersection(obj Object, other Object) {
-	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
-		p1 := obj.GetCenter()
-		p2 := other.GetCenter()
-		r1 := obj.GetWidth() / 2
-		r2 := other.GetWidth() / 2
-		penetrationDepth := r1 + r2 - p1.Distance(p2)
-		direction := p1.Sub(p2).Normalize()
-		obj.SetCenter(p1.Add(direction.MulScalar(penetrationDepth)))
-	}
-
-	if obj.GetCollisionType() == Rectangle && other.GetCollisionType() == Rectangle {
-		p1 := obj.GetCenter()
-		p2 := other.GetCenter()
-		w1 := obj.GetWidth() / 2
-		h1 := obj.GetHeight() / 2
-		w2 := other.GetWidth() / 2
-		h2 := other.GetHeight() / 2
-		xDistSquared := (p1.X - p2.X) * (p1.X - p2.X)
-		yDistSquared := (p1.Y - p2.Y) * (p1.Y - p2.Y)
-		if xDistSquared > yDistSquared {
-			if p1.X > p2.X {
-				obj.SetCenter(Vector2{X: other.GetCenter().X + w2 + w1, Y: obj.GetCenter().Y})
-			} else {
-				obj.SetCenter(Vector2{X: other.GetCenter().X - w2 - w1, Y: obj.GetCenter().Y})
-			}
-		} else {
-			if p1.Y > p2.Y {
-				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y + h2 + h1})
-			} else {
-				obj.SetCenter(Vector2{X: obj.GetCenter().X, Y: other.GetCenter().Y - h2 - h1})
-			}
-		}
-	}
-	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Rectangle {
-		// https://stackoverflow.com/questions/45370692/circle-rectangle-collision-response
-		circle := obj
-		rect := other
-		if obj.GetCollisionType() == Rectangle {
-			circle, rect = rect, circle
-		}
-
-		r1 := circle.GetCenter()
-		r2 := rect.GetCenter()
-		n := r1.Sub(r2).Normalize()
-		v1 := circle.GetVelocity()
-		v2 := rect.GetVelocity()
-		a1 := v1.Dot(n)
-		a2 := v2.Dot(n)
-		// Using the optimized version,
-		// optimizedP =  2(a1 - a2)
-		//              -----------
-		//                m1 + m2
-		optimizedP := (2.0 * (a1 - a2)) / (circle.GetMass() + rect.GetMass())
-		u1 := v1.Sub(n.MulScalar(optimizedP * rect.GetMass()))
-		u2 := v2.Add(n.MulScalar(optimizedP * circle.GetMass()))
-		circle.SetVelocity(u1)
-		rect.SetVelocity(u2)
-
-		NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
-		NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
-		dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
-
-		penetrationDepth := circle.GetWidth()/2 - dist.Length()
-		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
-		circle.SetCenter(circle.GetCenter().Add(penetrationVector))
-	}
 }
 
 func (m *Manager) Update(dt float64) {
-	for _, g := range m.objects {
-		g.UpdateVelocity(dt)
-		g.SetCenter(g.GetCenter().Add(g.GetVelocity()))
-		//g.applyFriction(playerVelocityDecay, dt)
-		g.SetVelocity(Vector2{
-			X: g.GetVelocity().X - g.GetVelocity().X*playerVelocityDecay*dt,
-			Y: g.GetVelocity().Y - g.GetVelocity().Y*playerVelocityDecay*dt,
-		})
+	for _, obj := range m.dynamicObjects {
+		obj.UpdateVelocity(dt)
+		obj.ApplyFriction(playerVelocityDecay, dt)
+		obj.MoveObject()
 
-		if collider := m.collidesWith(g); collider != nil {
-			fmt.Println("Collision detected: ", g.GetCenter(), collider.GetCenter())
+		if collider := m.resolveDynamicCollisions(obj); collider != nil {
+			fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
+		}
+		if collider := m.resolveStaticCollisions(obj); collider != nil {
+			fmt.Println("Static Collision detected: ", obj.GetCenter(), collider.GetCenter())
 		}
 	}
 }
 
-func (m *Manager) Objects() map[string]Object {
-	return m.objects // TODO safety?
-}
-
 func (m *Manager) MovePlayer(dir Direction, dt float64) {
-	playerObj := m.Objects()["current-player"]
+	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
 	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed * dt))
 }

@@ -157,8 +157,17 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		playerSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
-		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
-		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
+
+		switch obj.GetCollisionType() {
+		case game.Circle:
+			imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
+			imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
+		case game.Rectangle:
+			imd.Push(pixel.V(playerCenter.X-playerSize.X/2, playerCenter.Y-playerSize.Y/2))
+			imd.Push(pixel.V(playerCenter.X+playerSize.X/2, playerCenter.Y+playerSize.Y/2))
+			imd.Rectangle(0)
+		}
+
 		imd.Draw(h.win)
 	case game.Crate:
 		crateCenter := h.toGlobalSpace(obj.GetCenter())

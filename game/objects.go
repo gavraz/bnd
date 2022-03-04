@@ -1,17 +1,17 @@
 package game
 
 type player struct {
-	Object
+	DynamicObject
 
 	hp        int
 	primary   Ability
 	secondary Ability
 }
 
-func NewPlayer(object Object, hp int) *player {
+func NewPlayer(object DynamicObject, hp int) *player {
 	return &player{
-		Object: object,
-		hp:     hp,
+		DynamicObject: object,
+		hp:            hp,
 	}
 }
 
@@ -20,15 +20,15 @@ func (p *player) SwapAbilities() {
 }
 
 type crate struct {
-	Object
+	DynamicObject
 
 	ability Ability
 }
 
 type wall struct {
-	Object
+	StaticObject
 }
 
 type Bullet struct {
-	Object
+	DynamicObject
 }
