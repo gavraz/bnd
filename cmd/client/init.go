@@ -8,7 +8,7 @@ import (
 	"github.com/gavraz/menu/menu"
 )
 
-func buildMenuHandler() *menu.Handler {
+func buildMenuHandler(startGame func()) *menu.Handler {
 	h := menu.NewHandler()
 	settings := menu.NewBuilder(h).
 		WithOption("Name", func() {
@@ -20,7 +20,7 @@ func buildMenuHandler() *menu.Handler {
 
 	mainMenu := menu.NewBuilder(h).
 		WithOption("Start", func() {
-			fmt.Println("Starting game...")
+			startGame()
 		}).
 		WithSubMenu("Settings", settings).
 		WithOption("Quit", func() {
