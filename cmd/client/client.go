@@ -39,7 +39,7 @@ func (a *appManager) HandleInput(dt float64) {
 		a.displayHandler.HandleMenuInput(a.menuHandler)
 	}
 	if a.state == Game {
-		a.displayHandler.HandleInput(a.gameManager, dt)
+		a.displayHandler.HandleInput(a.gameManager, dt, func() { a.state = Menu })
 		a.gameManager.Update(dt)
 	}
 	a.displayHandler.Update()

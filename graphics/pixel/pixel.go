@@ -98,7 +98,7 @@ type Mover interface {
 	MovePlayer(direction game.Direction, dt float64)
 }
 
-func (h *Handler) HandleInput(m Mover, dt float64) {
+func (h *Handler) HandleInput(m Mover, dt float64, ExitGame func()) {
 	var dir game.Direction
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
 		dir.Up()
@@ -111,6 +111,9 @@ func (h *Handler) HandleInput(m Mover, dt float64) {
 	}
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
 		dir.Right()
+	}
+	if h.win.Pressed(pixelgl.KeyEscape) {
+		ExitGame()
 	}
 	m.MovePlayer(dir, dt)
 }
