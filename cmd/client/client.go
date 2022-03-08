@@ -2,7 +2,11 @@ package main
 
 import (
 	pixelg "bnd/graphics/pixel"
+	"flag"
 	"fmt"
+	"log"
+	"os"
+	"runtime/pprof"
 	"time"
 
 	"github.com/faiface/pixel"
@@ -39,6 +43,33 @@ func run() {
 	}
 }
 
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to `file`")
+
+/*
+.\client.exe -cpuprofile=cpuprof.prof
+go tool pprof -http=":8000" pprofbin .\cpuprof
+*/
+
 func main() {
+
+	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+		defer func(f *os.File) {
+			err := f.Close()
+			if err != nil {
+				log.Fatal("could not close file ", err)
+			}
+		}(f) // error handling omitted for example
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
+
+	// Your program here
 	pixelgl.Run(run)
 }
