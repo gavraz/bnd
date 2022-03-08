@@ -44,7 +44,7 @@ type DynamicObject interface {
 	GetAcceleration() Vector2
 	SetAcceleration(a Vector2)
 	UpdateVelocity(dt float64)
-	MoveObject()
+	MoveObject(dt float64)
 	GetBaseSpeed() float64
 	SetBaseSpeed(s float64)
 	GetMass() float64
@@ -103,8 +103,8 @@ func (g *GObject) UpdateVelocity(dt float64) {
 	g.Velocity = g.Velocity.Add(g.Acceleration.MulScalar(dt))
 }
 
-func (g *GObject) MoveObject() {
-	g.Center = g.Center.Add(g.Velocity)
+func (g *GObject) MoveObject(dt float64) {
+	g.Center = g.Center.Add(g.Velocity.MulScalar(dt).Add(g.Acceleration.MulScalar(dt * dt / 2)))
 }
 
 func (g *GObject) SetVelocity(a Vector2) {

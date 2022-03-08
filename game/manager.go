@@ -157,7 +157,7 @@ func (m *Manager) Update(dt float64) {
 	for _, obj := range m.dynamicObjects {
 		obj.UpdateVelocity(dt)
 		obj.ApplyFriction(playerVelocityDecay, dt)
-		obj.MoveObject()
+		obj.MoveObject(dt)
 
 		if collider := m.resolveDynamicCollisions(obj); collider != nil {
 			fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
@@ -168,8 +168,8 @@ func (m *Manager) Update(dt float64) {
 	}
 }
 
-func (m *Manager) MovePlayer(dir Direction, dt float64) {
+func (m *Manager) MovePlayer(dir Direction) {
 	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
-	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed * dt))
+	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed))
 }

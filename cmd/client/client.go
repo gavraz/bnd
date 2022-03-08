@@ -28,11 +28,11 @@ func run() {
 	last := time.Now()
 	for !displayHandler.Closed() {
 		dt := time.Since(last).Seconds()
+		last = time.Now()
 		//displayHandler.DrawMenu(menuHandler)
 		//displayHandler.HandleInput(menuHandler)
 		displayHandler.DrawGame(gameManager)
-		last = time.Now()
-		displayHandler.HandleInput(gameManager, dt)
+		displayHandler.HandleInput(gameManager)
 		gameManager.Update(dt)
 		displayHandler.Update()
 		//<-fps
