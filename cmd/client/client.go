@@ -18,23 +18,14 @@ func run() {
 		VSync:     true,
 		Resizable: true,
 	}
-
-	displayHandler := pixelg.New()
-	displayHandler.Init(cfg)
-
-	gameManager := buildGameManager()
-	//menuHandler := buildMenuHandler()
-	//fps := time.Tick(time.Second / 30) // Test out if physics are working as intended with various fps values
+	var App *app
+	App = &app{sMenu, pixelg.New(cfg), buildMenuHandler(func() { App.state = sGame }), buildGameManager()}
 	last := time.Now()
-	for !displayHandler.Closed() {
+	for !App.Closed() {
 		dt := time.Since(last).Seconds()
 		last = time.Now()
-		//displayHandler.DrawMenu(menuHandler)
-		//displayHandler.HandleInput(menuHandler)
-		displayHandler.DrawGame(gameManager)
-		displayHandler.HandleInput(gameManager)
-		gameManager.Update(dt)
-		displayHandler.Update()
+		App.HandleInput(dt)
+		App.Draw()
 		//<-fps
 	}
 }

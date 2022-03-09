@@ -33,8 +33,10 @@ type Handler struct {
 	win *pixelgl.Window
 }
 
-func New() *Handler {
-	return &Handler{}
+func New(cfg pixelgl.WindowConfig) *Handler {
+	h := &Handler{}
+	h.Init(cfg)
+	return h
 }
 
 func (h *Handler) Init(cfg pixelgl.WindowConfig) {
@@ -98,7 +100,7 @@ type Mover interface {
 	MovePlayer(direction game.Direction)
 }
 
-func (h *Handler) HandleInput(m Mover) {
+func (h *Handler) HandleInput(m Mover, exitGame func()) {
 	var dir game.Direction
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
 		dir.Up()
@@ -111,6 +113,9 @@ func (h *Handler) HandleInput(m Mover) {
 	}
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
 		dir.Right()
+	}
+	if h.win.Pressed(pixelgl.KeyEscape) {
+		exitGame()
 	}
 	m.MovePlayer(dir)
 }
