@@ -18,14 +18,16 @@ func run() {
 		VSync:     true,
 		Resizable: true,
 	}
-	var App *app
-	App = &app{sMenu, pixelg.New(cfg), buildMenuHandler(func() { App.state = sGame }), buildGameManager()}
+	dh := pixelg.New()
+	dh.Init(cfg)
+	var app *application
+	app = &application{stateMenu, dh, buildMenuHandler(func() { app.appState = stateGame }), buildGameManager()}
 	last := time.Now()
-	for !App.Closed() {
+	for !app.Closed() {
 		dt := time.Since(last).Seconds()
 		last = time.Now()
-		App.HandleInput(dt)
-		App.Draw()
+		app.HandleInput(dt)
+		app.Draw()
 		//<-fps
 	}
 }

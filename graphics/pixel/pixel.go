@@ -33,10 +33,8 @@ type Handler struct {
 	win *pixelgl.Window
 }
 
-func New(cfg pixelgl.WindowConfig) *Handler {
-	h := &Handler{}
-	h.Init(cfg)
-	return h
+func New() *Handler {
+	return &Handler{}
 }
 
 func (h *Handler) Init(cfg pixelgl.WindowConfig) {
