@@ -2,6 +2,7 @@ package pixel
 
 import (
 	"bnd/game"
+	"bnd/input"
 	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
@@ -14,13 +15,6 @@ import (
 type choicer interface {
 	CurrentChoice() int
 	Choices() []string
-}
-
-type menuHandler interface {
-	NextChoice()
-	PrevChoice()
-	Choose()
-	GoBack()
 }
 
 type Environmenter interface {
@@ -84,43 +78,12 @@ func (h *Handler) DrawMenu(c choicer) {
 	basicTxt.Draw(h.win, pixel.IM.Moved(pixel.V(-basicTxt.Bounds().W()/2, basicTxt.Bounds().H()/2)).Scaled(basicTxt.Orig, 3.0))
 }
 
-func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
-	if h.win.JustPressed(pixelgl.KeyS) || h.win.JustPressed(pixelgl.KeyDown) {
-		menuHandler.NextChoice()
-	}
-	if h.win.JustPressed(pixelgl.KeyW) || h.win.JustPressed(pixelgl.KeyUp) {
-		menuHandler.PrevChoice()
-	}
-	if h.win.JustPressed(pixelgl.KeyEnter) {
-		menuHandler.Choose()
-	}
-	if h.win.JustPressed(pixelgl.KeyEscape) || h.win.JustPressed(pixelgl.KeyBackspace) {
-		menuHandler.GoBack()
-	}
+func (h *Handler) Pressed(key input.Key) bool {
+	return h.win.Pressed(toPixel(key))
 }
 
-type Mover interface {
-	MovePlayer(direction game.Direction)
-}
-
-func (h *Handler) HandleGameInput(m Mover, pauseGame func()) {
-	var dir game.Direction
-	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
-		dir.Up()
-	}
-	if h.win.Pressed(pixelgl.KeyS) || h.win.Pressed(pixelgl.KeyDown) {
-		dir.Down()
-	}
-	if h.win.Pressed(pixelgl.KeyA) || h.win.Pressed(pixelgl.KeyLeft) {
-		dir.Left()
-	}
-	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
-		dir.Right()
-	}
-	if h.win.JustPressed(pixelgl.KeyEscape) {
-		pauseGame()
-	}
-	m.MovePlayer(dir)
+func (h *Handler) JustPressed(key input.Key) bool {
+	return h.win.JustPressed(toPixel(key))
 }
 
 func (h *Handler) DrawGame(env Environmenter) {

@@ -10,7 +10,7 @@ import (
 func run() {
 	fmt.Println("Client: Hello B&D")
 
-	app := NewApplication()
+	app := &application{}
 	app.Init()
 	last := time.Now()
 	for !app.Running() {
