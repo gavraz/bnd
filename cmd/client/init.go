@@ -8,9 +8,49 @@ import (
 	"github.com/gavraz/menu/menu"
 )
 
-func buildMenuHandler(startGame func(), ChangeResolution func(int, int)) *menu.Handler {
+func buildMainMenuHandler(startGame func(), ChangeResolution func(int, int)) *menu.Handler {
 	h := menu.NewHandler()
 
+	settings := buildSettings(h, ChangeResolution)
+
+	mainMenu := menu.NewBuilder(h).
+		WithOption("Start", func() {
+			startGame()
+		}).
+		WithSubMenu("Settings", settings).
+		WithOption("Quit", func() {
+			fmt.Println("quitting")
+			os.Exit(0)
+		}).
+		Build()
+
+	h.SetMenu(mainMenu)
+
+	return h
+}
+
+func buildPauseMenuHandler(resumeGame func(), toMainMenu func(), quitGame func(), ChangeResolution func(int, int)) *menu.Handler {
+	h := menu.NewHandler()
+
+	pauseMenu := menu.NewBuilder(h).
+		WithOption("Resume", func() {
+			resumeGame()
+		}).
+		WithSubMenu("Settings", buildSettings(h, ChangeResolution)).
+		WithOption("To Main Menu", func() {
+			toMainMenu()
+		}).
+		WithOption("Quit", func() {
+			quitGame()
+		}).
+		Build()
+
+	h.SetMenu(pauseMenu)
+
+	return h
+}
+
+func buildSettings(h *menu.Handler, ChangeResolution func(int, int)) *menu.Menu {
 	resolution := menu.NewBuilder(h).
 		WithOption("1920x1080", func() {
 			ChangeResolution(1920, 1080)
@@ -40,21 +80,7 @@ func buildMenuHandler(startGame func(), ChangeResolution func(int, int)) *menu.H
 		}).
 		WithGoBack("Go Back").
 		Build()
-
-	mainMenu := menu.NewBuilder(h).
-		WithOption("Start", func() {
-			startGame()
-		}).
-		WithSubMenu("Settings", settings).
-		WithOption("Quit", func() {
-			fmt.Println("quitting")
-			os.Exit(0)
-		}).
-		Build()
-
-	h.SetMenu(mainMenu)
-
-	return h
+	return settings
 }
 
 func buildGameManager() *game.Manager {

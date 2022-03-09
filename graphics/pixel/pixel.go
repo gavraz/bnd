@@ -103,15 +103,11 @@ type Mover interface {
 	MovePlayer(direction game.Direction)
 }
 
-type Backer interface {
-	BackToMenu()
+type Pauser interface {
+	PauseGame()
 }
 
-type Resetter interface {
-	ResetGame()
-}
-
-func (h *Handler) HandleGameInput(m Mover, b Backer, r Resetter) {
+func (h *Handler) HandleGameInput(m Mover, p Pauser) {
 	var dir game.Direction
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
 		dir.Up()
@@ -126,8 +122,7 @@ func (h *Handler) HandleGameInput(m Mover, b Backer, r Resetter) {
 		dir.Right()
 	}
 	if h.win.JustPressed(pixelgl.KeyEscape) {
-		b.BackToMenu()
-		r.ResetGame()
+		p.PauseGame()
 	}
 	m.MovePlayer(dir)
 }
