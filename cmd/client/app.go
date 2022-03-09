@@ -13,14 +13,14 @@ const (
 	sGame
 )
 
-type appManager struct {
+type app struct {
 	state          State
 	displayHandler *pixelg.Handler
 	menuHandler    *menu.Handler
 	gameManager    *game.Manager
 }
 
-func (a *appManager) HandleInput(dt float64) {
+func (a *app) HandleInput(dt float64) {
 	if a.state == sMenu {
 		a.displayHandler.HandleMenuInput(a.menuHandler)
 	} else {
@@ -30,7 +30,7 @@ func (a *appManager) HandleInput(dt float64) {
 	a.displayHandler.Update()
 }
 
-func (a *appManager) Draw() {
+func (a *app) Draw() {
 	if a.state == sMenu {
 		a.displayHandler.DrawMenu(a.menuHandler)
 	} else {
@@ -39,6 +39,6 @@ func (a *appManager) Draw() {
 
 }
 
-func (a *appManager) Closed() bool {
+func (a *app) Closed() bool {
 	return a.displayHandler.Closed()
 }
