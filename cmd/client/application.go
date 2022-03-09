@@ -40,10 +40,12 @@ func (a *application) Init() {
 	a.appState = stateMenu
 	a.displayHandler = pixelg.NewHandler()
 	a.displayHandler.Init(cfg)
-	a.mainMenuHandler = buildMainMenuHandler(func() { a.appState = stateGame }, a.changeResolution)
-	a.pauseMenuHandler = buildPauseMenuHandler(func() { a.appState = stateGame },
-		func() { a.appState = stateMenu },
-		func() { os.Exit(0) },
+	a.mainMenuHandler = buildMainMenuHandler(a.StartGame, a.changeResolution)
+	a.pauseMenuHandler = buildPauseMenuHandler(
+		a.ResumeGame,
+		a.BackToMenu,
+		a.QuitGame,
+		a.RestartGame,
 		a.changeResolution)
 	a.gameManager = buildGameManager()
 }
@@ -89,4 +91,21 @@ func (a *application) BackToMenu() {
 
 func (a *application) PauseGame() {
 	a.appState = statePause
+}
+
+func (a *application) ResumeGame() {
+	a.appState = stateGame
+}
+
+func (a *application) RestartGame() {
+	a.gameManager.ResetGame()
+	a.appState = stateGame
+}
+
+func (a *application) QuitGame() {
+	os.Exit(0)
+}
+
+func (a *application) StartGame() {
+	a.appState = stateGame
 }

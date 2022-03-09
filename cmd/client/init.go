@@ -29,12 +29,15 @@ func buildMainMenuHandler(startGame func(), ChangeResolution func(int, int)) *me
 	return h
 }
 
-func buildPauseMenuHandler(resumeGame func(), toMainMenu func(), quitGame func(), ChangeResolution func(int, int)) *menu.Handler {
+func buildPauseMenuHandler(resumeGame func(), toMainMenu func(), quitGame func(), restartGame func(), ChangeResolution func(int, int)) *menu.Handler {
 	h := menu.NewHandler()
 
 	pauseMenu := menu.NewBuilder(h).
 		WithOption("Resume", func() {
 			resumeGame()
+		}).
+		WithOption("Restart Game", func() {
+			restartGame()
 		}).
 		WithSubMenu("Settings", buildSettings(h, ChangeResolution)).
 		WithOption("To Main Menu", func() {
