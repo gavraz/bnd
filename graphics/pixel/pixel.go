@@ -3,7 +3,6 @@ package pixel
 import (
 	"bnd/game"
 	"fmt"
-
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
@@ -33,7 +32,7 @@ type Handler struct {
 	win *pixelgl.Window
 }
 
-func New() *Handler {
+func NewHandler() *Handler {
 	return &Handler{}
 }
 
@@ -82,7 +81,7 @@ func (h *Handler) DrawMenu(c choicer) {
 		_, _ = fmt.Fprintln(basicTxt, item)
 	}
 	basicTxt.Orig = basicTxt.Orig.Add(pixel.V(0.0, basicTxt.Bounds().H()/2))
-	basicTxt.Draw(h.win, pixel.IM.Moved(pixel.V(-basicTxt.Bounds().W()/2, basicTxt.Bounds().H()/2)).Scaled(basicTxt.Orig, 2.0))
+	basicTxt.Draw(h.win, pixel.IM.Moved(pixel.V(-basicTxt.Bounds().W()/2, basicTxt.Bounds().H()/2)).Scaled(basicTxt.Orig, 3.0))
 }
 
 func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
@@ -104,7 +103,15 @@ type Mover interface {
 	MovePlayer(direction game.Direction)
 }
 
-func (h *Handler) HandleInput(m Mover) {
+type Backer interface {
+	BackToMenu()
+}
+
+type Resetter interface {
+	ResetGame()
+}
+
+func (h *Handler) HandleGameInput(m Mover, b Backer, r Resetter) {
 	var dir game.Direction
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
 		dir.Up()
@@ -117,6 +124,10 @@ func (h *Handler) HandleInput(m Mover) {
 	}
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
 		dir.Right()
+	}
+	if h.win.JustPressed(pixelgl.KeyEscape) {
+		b.BackToMenu()
+		r.ResetGame()
 	}
 	m.MovePlayer(dir)
 }

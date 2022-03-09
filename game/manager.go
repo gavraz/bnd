@@ -173,3 +173,7 @@ func (m *Manager) MovePlayer(dir Direction) {
 	curSpeed := playerObj.GetBaseSpeed()
 	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed))
 }
+
+func (m *Manager) ResetGame() {
+	m.InitGame()
+}

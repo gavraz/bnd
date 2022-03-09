@@ -24,9 +24,6 @@ func buildMenuHandler(startGame func(), ChangeResolution func(int, int)) *menu.H
 		WithOption("640x480", func() {
 			ChangeResolution(640, 480)
 		}).
-		WithOption("320x240", func() {
-			ChangeResolution(320, 240)
-		}).
 		WithGoBack("Go Back").
 		Build()
 
