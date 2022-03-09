@@ -37,7 +37,7 @@ func (a *application) Init() {
 	a.appState = stateMenu
 	a.displayHandler = pixelg.NewHandler()
 	a.displayHandler.Init(cfg)
-	a.menuHandler = buildMenuHandler(func() { a.appState = stateGame }, a.ChangeResolution)
+	a.menuHandler = buildMenuHandler(func() { a.appState = stateGame }, a.changeResolution)
 	a.gameManager = buildGameManager()
 }
 
@@ -67,7 +67,7 @@ func (a *application) Closed() bool {
 	return a.displayHandler.Closed()
 }
 
-func (a *application) ChangeResolution(width, height int) {
+func (a *application) changeResolution(width, height int) {
 	a.displayHandler.ChangeResolution(width, height)
 }
 
