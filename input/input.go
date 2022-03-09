@@ -18,12 +18,14 @@ const (
 type action int
 
 const (
-	Up action = iota
-	Down
-	Left
-	Right
-	ESC
-	Enter
+	playerUp action = iota
+	playerDown
+	playerLeft
+	playerRight
+	menuUp
+	menuDown
+	esc
+	enter
 )
 
 type Controller struct {
@@ -40,12 +42,14 @@ func NewController() *Controller {
 }
 
 func (c *Controller) setDefault() {
-	c.mappings[Up] = KeyW
-	c.mappings[Down] = KeyS
-	c.mappings[Left] = KeyA
-	c.mappings[Right] = KeyD
-	c.mappings[ESC] = KeyEsc
-	c.mappings[Enter] = KeyEnter
+	c.mappings[playerUp] = KeyW
+	c.mappings[playerDown] = KeyS
+	c.mappings[playerLeft] = KeyA
+	c.mappings[playerRight] = KeyD
+	c.mappings[menuUp] = KeyW
+	c.mappings[menuDown] = KeyS
+	c.mappings[esc] = KeyEsc
+	c.mappings[enter] = KeyEnter
 }
 
 type movePlayerFunc func(direction game.Direction)
@@ -53,19 +57,19 @@ type movePlayerFunc func(direction game.Direction)
 func (c *Controller) HandleGameInput(isPressed func(key Key) bool, pauseGame func(), movePlayer movePlayerFunc) {
 	var dir game.Direction
 
-	if isPressed(c.mappings[Up]) {
+	if isPressed(c.mappings[playerUp]) {
 		dir.Up()
 	}
-	if isPressed(c.mappings[Down]) {
+	if isPressed(c.mappings[playerDown]) {
 		dir.Down()
 	}
-	if isPressed(c.mappings[Left]) {
+	if isPressed(c.mappings[playerLeft]) {
 		dir.Left()
 	}
-	if isPressed(c.mappings[Right]) {
+	if isPressed(c.mappings[playerRight]) {
 		dir.Right()
 	}
-	if isPressed(c.mappings[ESC]) {
+	if isPressed(c.mappings[esc]) {
 		pauseGame()
 	}
 
@@ -80,16 +84,16 @@ type menuHandler interface {
 }
 
 func (c *Controller) HandleMenuInput(isPressed func(key Key) bool, menuHandler menuHandler) {
-	if isPressed(c.mappings[Down]) {
+	if isPressed(c.mappings[menuDown]) {
 		menuHandler.NextChoice()
 	}
-	if isPressed(c.mappings[Up]) {
+	if isPressed(c.mappings[menuUp]) {
 		menuHandler.PrevChoice()
 	}
-	if isPressed(c.mappings[Enter]) {
+	if isPressed(c.mappings[enter]) {
 		menuHandler.Choose()
 	}
-	if isPressed(c.mappings[ESC]) {
+	if isPressed(c.mappings[esc]) {
 		menuHandler.GoBack()
 	}
 }
