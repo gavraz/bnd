@@ -3,7 +3,6 @@ package pixel
 import (
 	"bnd/game"
 	"fmt"
-
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
@@ -33,7 +32,7 @@ type Handler struct {
 	win *pixelgl.Window
 }
 
-func New() *Handler {
+func NewHandler() *Handler {
 	return &Handler{}
 }
 
@@ -43,6 +42,10 @@ func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (h *Handler) ChangeResolution(width, height int) {
+	h.win.SetBounds(pixel.R(0, 0, float64(width), float64(height)))
 }
 
 func (h *Handler) Closed() bool {
@@ -65,8 +68,9 @@ func (h *Handler) DrawMenu(c choicer) {
 	h.win.Clear(colornames.Skyblue)
 
 	basicAtlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
-	basicTxt := text.New(pixel.V(100, 500), basicAtlas)
-
+	var v game.Vector2
+	v = h.toGlobalSpace(v)
+	basicTxt := text.New(pixel.V(v.X, v.Y), basicAtlas)
 	current := c.CurrentChoice()
 	for i, item := range c.Choices() {
 		if i == current {
@@ -75,8 +79,9 @@ func (h *Handler) DrawMenu(c choicer) {
 			basicTxt.Color = colornames.White
 		}
 		_, _ = fmt.Fprintln(basicTxt, item)
-		basicTxt.Draw(h.win, pixel.IM.Scaled(basicTxt.Orig, 4))
 	}
+	basicTxt.Orig = basicTxt.Orig.Add(pixel.V(0.0, basicTxt.Bounds().H()/2))
+	basicTxt.Draw(h.win, pixel.IM.Moved(pixel.V(-basicTxt.Bounds().W()/2, basicTxt.Bounds().H()/2)).Scaled(basicTxt.Orig, 3.0))
 }
 
 func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
@@ -98,7 +103,7 @@ type Mover interface {
 	MovePlayer(direction game.Direction)
 }
 
-func (h *Handler) HandleInput(m Mover) {
+func (h *Handler) HandleGameInput(m Mover, pauseGame func()) {
 	var dir game.Direction
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
 		dir.Up()
@@ -112,20 +117,14 @@ func (h *Handler) HandleInput(m Mover) {
 	if h.win.Pressed(pixelgl.KeyD) || h.win.Pressed(pixelgl.KeyRight) {
 		dir.Right()
 	}
+	if h.win.JustPressed(pixelgl.KeyEscape) {
+		pauseGame()
+	}
 	m.MovePlayer(dir)
 }
 
 func (h *Handler) DrawGame(env Environmenter) {
 	h.win.Clear(colornames.Black) // TODO decide color
-
-	var sidePadding = h.w() * 0.02
-	var bottomPadding = h.h() * 0.15
-	border := imdraw.New(nil)
-	border.Color = pixel.RGB(255, 255, 255)
-	border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
-	border.Push(pixel.V(h.w()-sidePadding, h.h()-sidePadding))
-	border.Rectangle(1)
-	border.Draw(h.win)
 
 	env.ForEachGameObject(h.drawGameObject)
 	h.drawGameBottomPanel(env.HP())
@@ -138,16 +137,24 @@ func (h *Handler) drawGameBottomPanel(hp int) {
 	basicTxt.Draw(h.win, pixel.IM.Scaled(basicTxt.Orig, 2.5))
 }
 
-func (h *Handler) toLocalSpace(v game.Vector2) game.Vector2 {
-	return game.Vector2{X: v.X/h.w()*2 - 1, Y: v.Y/h.h()*2 - 1}
+func (h *Handler) aspectRatio() float64 {
+	return h.w() / h.h()
 }
 
+func (h *Handler) toLocalSpace(v game.Vector2) game.Vector2 {
+	aspectRatio := h.aspectRatio()
+	return game.Vector2{X: v.X/h.w()*2 - 1*aspectRatio, Y: v.Y/h.h()*2 - 1}
+}
+
+// Converts a point from local space to global space (i.e. screen space)
 func (h *Handler) toGlobalSpace(v game.Vector2) game.Vector2 {
-	return game.Vector2{X: (v.X + 1) * h.w() / 2, Y: (v.Y + 1) * h.h() / 2}
+	aspectRatio := h.aspectRatio()
+	return game.Vector2{X: (v.X + aspectRatio) * h.w() / 2 / aspectRatio, Y: (v.Y + 1) * h.h() / 2}
 }
 
 func (h *Handler) toGlobalUnits(v game.Vector2) game.Vector2 {
-	return game.Vector2{X: v.X * h.w() / 2, Y: v.Y * h.h() / 2}
+	aspectRatio := h.aspectRatio()
+	return game.Vector2{X: v.X * h.w() / 2 / aspectRatio, Y: v.Y * h.h() / 2}
 }
 
 func (h *Handler) drawGameObject(obj game.Object) {
