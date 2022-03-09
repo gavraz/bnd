@@ -13,8 +13,8 @@ import (
 type state int
 
 const (
-	stateMenu state = iota
-	statePause
+	stateMainMenu state = iota
+	statePauseMenu
 	stateGame
 )
 
@@ -35,7 +35,7 @@ func (a *application) Init() {
 		Resizable: true,
 	}
 
-	a.state = stateMenu
+	a.state = stateMainMenu
 	a.displayHandler = pixelg.NewHandler()
 	a.displayHandler.Init(cfg)
 	a.mainMenuHandler = buildMainMenuHandler(a.StartGame, a.changeResolution)
@@ -50,11 +50,12 @@ func (a *application) Init() {
 }
 
 func (a *application) HandleInput() {
-	if a.state == stateMenu {
+	switch a.state {
+	case stateMainMenu:
 		a.inputController.HandleMenuInput(a.displayHandler.JustPressed, a.mainMenuHandler)
-	} else if a.state == statePause {
+	case statePauseMenu:
 		a.inputController.HandleMenuInput(a.displayHandler.JustPressed, a.pauseMenuHandler)
-	} else if a.state == stateGame {
+	case stateGame:
 		a.inputController.HandleGameInput(a.displayHandler.Pressed, a.PauseGame, a.gameManager.MovePlayer)
 	}
 }
@@ -67,14 +68,14 @@ func (a *application) Update(dt float64) {
 }
 
 func (a *application) Draw() {
-	if a.state == stateMenu {
+	switch a.state {
+	case stateMainMenu:
 		a.displayHandler.DrawMenu(a.mainMenuHandler)
-	} else if a.state == statePause {
+	case statePauseMenu:
 		a.displayHandler.DrawMenu(a.pauseMenuHandler)
-	} else if a.state == stateGame {
+	case stateGame:
 		a.displayHandler.DrawGame(a.gameManager)
 	}
-
 }
 
 func (a *application) Running() bool {
@@ -86,11 +87,11 @@ func (a *application) changeResolution(width, height int) {
 }
 
 func (a *application) BackToMenu() {
-	a.state = stateMenu
+	a.state = stateMainMenu
 }
 
 func (a *application) PauseGame() {
-	a.state = statePause
+	a.state = statePauseMenu
 }
 
 func (a *application) ResumeGame() {
