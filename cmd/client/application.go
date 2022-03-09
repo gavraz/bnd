@@ -61,7 +61,9 @@ func (a *application) HandleInput() {
 }
 
 func (a *application) Update(dt float64) {
-	a.gameManager.Update(dt)
+	if a.appState == stateGame {
+		a.gameManager.Update(dt)
+	}
 	a.displayHandler.Update()
 }
 
