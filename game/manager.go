@@ -175,5 +175,11 @@ func (m *Manager) MovePlayer(dir Direction) {
 }
 
 func (m *Manager) ResetGame() {
+	m.clearGameData()
 	m.InitGame()
+}
+
+func (m *Manager) clearGameData() {
+	m.dynamicObjects = make(map[string]DynamicObject)
+	m.staticObjects = make(map[string]StaticObject)
 }
