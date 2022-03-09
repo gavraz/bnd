@@ -3,6 +3,7 @@ package main
 import (
 	"bnd/game"
 	pixelg "bnd/graphics/pixel"
+	"bnd/input"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/gavraz/menu/menu"
@@ -23,10 +24,7 @@ type application struct {
 	mainMenuHandler  *menu.Handler
 	pauseMenuHandler *menu.Handler
 	gameManager      *game.Manager
-}
-
-func NewApplication() *application {
-	return &application{}
+	inputController  *input.Controller
 }
 
 func (a *application) Init() {
@@ -48,15 +46,16 @@ func (a *application) Init() {
 		a.RestartGame,
 		a.changeResolution)
 	a.gameManager = buildGameManager()
+	a.inputController = input.NewController()
 }
 
 func (a *application) HandleInput() {
 	if a.state == stateMenu {
-		a.displayHandler.HandleMenuInput(a.mainMenuHandler)
+		a.inputController.HandleMenuInput(a.displayHandler.JustPressed, a.mainMenuHandler)
 	} else if a.state == statePause {
-		a.displayHandler.HandleMenuInput(a.pauseMenuHandler)
+		a.inputController.HandleMenuInput(a.displayHandler.JustPressed, a.pauseMenuHandler)
 	} else if a.state == stateGame {
-		a.displayHandler.HandleGameInput(a.gameManager, a.PauseGame)
+		a.inputController.HandleGameInput(a.displayHandler.Pressed, a.PauseGame, a.gameManager.MovePlayer)
 	}
 }
 
