@@ -68,7 +68,7 @@ func (h *Handler) DrawMenu(c choicer) {
 	h.win.Clear(colornames.Skyblue)
 
 	basicAtlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
-	v := game.Vector2{0.0, 0.0}
+	var v game.Vector2
 	v = h.toGlobalSpace(v)
 	basicTxt := text.New(pixel.V(v.X, v.Y), basicAtlas)
 	current := c.CurrentChoice()
@@ -103,11 +103,7 @@ type Mover interface {
 	MovePlayer(direction game.Direction)
 }
 
-type Pauser interface {
-	PauseGame()
-}
-
-func (h *Handler) HandleGameInput(m Mover, p Pauser) {
+func (h *Handler) HandleGameInput(m Mover, pauseGame func()) {
 	var dir game.Direction
 	if h.win.Pressed(pixelgl.KeyW) || h.win.Pressed(pixelgl.KeyUp) {
 		dir.Up()
@@ -122,7 +118,7 @@ func (h *Handler) HandleGameInput(m Mover, p Pauser) {
 		dir.Right()
 	}
 	if h.win.JustPressed(pixelgl.KeyEscape) {
-		p.PauseGame()
+		pauseGame()
 	}
 	m.MovePlayer(dir)
 }
@@ -141,19 +137,23 @@ func (h *Handler) drawGameBottomPanel(hp int) {
 	basicTxt.Draw(h.win, pixel.IM.Scaled(basicTxt.Orig, 2.5))
 }
 
+func (h *Handler) aspectRatio() float64 {
+	return h.w() / h.h()
+}
+
 func (h *Handler) toLocalSpace(v game.Vector2) game.Vector2 {
-	var aspectRatio = h.w() / h.h()
+	aspectRatio := h.aspectRatio()
 	return game.Vector2{X: v.X/h.w()*2 - 1*aspectRatio, Y: v.Y/h.h()*2 - 1}
 }
 
 // Converts a point from local space to global space (i.e. screen space)
 func (h *Handler) toGlobalSpace(v game.Vector2) game.Vector2 {
-	var aspectRatio = h.w() / h.h()
+	aspectRatio := h.aspectRatio()
 	return game.Vector2{X: (v.X + aspectRatio) * h.w() / 2 / aspectRatio, Y: (v.Y + 1) * h.h() / 2}
 }
 
 func (h *Handler) toGlobalUnits(v game.Vector2) game.Vector2 {
-	var aspectRatio = h.w() / h.h()
+	aspectRatio := h.aspectRatio()
 	return game.Vector2{X: v.X * h.w() / 2 / aspectRatio, Y: v.Y * h.h() / 2}
 }
 

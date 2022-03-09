@@ -13,13 +13,12 @@ func run() {
 	app := NewApplication()
 	app.Init()
 	last := time.Now()
-	for !app.Closed() {
+	for !app.Running() {
 		dt := time.Since(last).Seconds()
 		last = time.Now()
 		app.HandleInput()
 		app.Draw()
 		app.Update(dt)
-		//<-fps
 	}
 }
 

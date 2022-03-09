@@ -18,7 +18,7 @@ const (
 )
 
 type application struct {
-	appState         state
+	state            state
 	displayHandler   *pixelg.Handler
 	mainMenuHandler  *menu.Handler
 	pauseMenuHandler *menu.Handler
@@ -37,7 +37,7 @@ func (a *application) Init() {
 		Resizable: true,
 	}
 
-	a.appState = stateMenu
+	a.state = stateMenu
 	a.displayHandler = pixelg.NewHandler()
 	a.displayHandler.Init(cfg)
 	a.mainMenuHandler = buildMainMenuHandler(a.StartGame, a.changeResolution)
@@ -51,34 +51,34 @@ func (a *application) Init() {
 }
 
 func (a *application) HandleInput() {
-	if a.appState == stateMenu {
+	if a.state == stateMenu {
 		a.displayHandler.HandleMenuInput(a.mainMenuHandler)
-	} else if a.appState == statePause {
+	} else if a.state == statePause {
 		a.displayHandler.HandleMenuInput(a.pauseMenuHandler)
-	} else if a.appState == stateGame {
-		a.displayHandler.HandleGameInput(a.gameManager, a)
+	} else if a.state == stateGame {
+		a.displayHandler.HandleGameInput(a.gameManager, a.PauseGame)
 	}
 }
 
 func (a *application) Update(dt float64) {
-	if a.appState == stateGame {
+	if a.state == stateGame {
 		a.gameManager.Update(dt)
 	}
 	a.displayHandler.Update()
 }
 
 func (a *application) Draw() {
-	if a.appState == stateMenu {
+	if a.state == stateMenu {
 		a.displayHandler.DrawMenu(a.mainMenuHandler)
-	} else if a.appState == statePause {
+	} else if a.state == statePause {
 		a.displayHandler.DrawMenu(a.pauseMenuHandler)
-	} else if a.appState == stateGame {
+	} else if a.state == stateGame {
 		a.displayHandler.DrawGame(a.gameManager)
 	}
 
 }
 
-func (a *application) Closed() bool {
+func (a *application) Running() bool {
 	return a.displayHandler.Closed()
 }
 
@@ -87,21 +87,20 @@ func (a *application) changeResolution(width, height int) {
 }
 
 func (a *application) BackToMenu() {
-	a.gameManager.ResetGame()
-	a.appState = stateMenu
+	a.state = stateMenu
 }
 
 func (a *application) PauseGame() {
-	a.appState = statePause
+	a.state = statePause
 }
 
 func (a *application) ResumeGame() {
-	a.appState = stateGame
+	a.state = stateGame
 }
 
 func (a *application) RestartGame() {
 	a.gameManager.ResetGame()
-	a.appState = stateGame
+	a.state = stateGame
 }
 
 func (a *application) QuitGame() {
@@ -109,5 +108,6 @@ func (a *application) QuitGame() {
 }
 
 func (a *application) StartGame() {
-	a.appState = stateGame
+	a.gameManager.ResetGame()
+	a.state = stateGame
 }
