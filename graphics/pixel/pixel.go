@@ -45,6 +45,10 @@ func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	}
 }
 
+func (h *Handler) ChangeResolution(width, height int) {
+	h.win.SetBounds(pixel.R(0, 0, float64(width), float64(height)))
+}
+
 func (h *Handler) Closed() bool {
 	return h.win.Closed()
 }
@@ -65,8 +69,9 @@ func (h *Handler) DrawMenu(c choicer) {
 	h.win.Clear(colornames.Skyblue)
 
 	basicAtlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
-	basicTxt := text.New(pixel.V(100, 500), basicAtlas)
-
+	v := game.Vector2{0.0, 0.0}
+	v = h.toGlobalSpace(v)
+	basicTxt := text.New(pixel.V(v.X, v.Y), basicAtlas)
 	current := c.CurrentChoice()
 	for i, item := range c.Choices() {
 		if i == current {
@@ -75,8 +80,9 @@ func (h *Handler) DrawMenu(c choicer) {
 			basicTxt.Color = colornames.White
 		}
 		_, _ = fmt.Fprintln(basicTxt, item)
-		basicTxt.Draw(h.win, pixel.IM.Scaled(basicTxt.Orig, 4))
 	}
+	basicTxt.Orig = basicTxt.Orig.Add(pixel.V(0.0, basicTxt.Bounds().H()/2))
+	basicTxt.Draw(h.win, pixel.IM.Moved(pixel.V(-basicTxt.Bounds().W()/2, basicTxt.Bounds().H()/2)).Scaled(basicTxt.Orig, 2.0))
 }
 
 func (h *Handler) HandleMenuInput(menuHandler menuHandler) {
@@ -118,15 +124,6 @@ func (h *Handler) HandleInput(m Mover) {
 func (h *Handler) DrawGame(env Environmenter) {
 	h.win.Clear(colornames.Black) // TODO decide color
 
-	var sidePadding = h.w() * 0.02
-	var bottomPadding = h.h() * 0.15
-	border := imdraw.New(nil)
-	border.Color = pixel.RGB(255, 255, 255)
-	border.Push(pixel.V(sidePadding, bottomPadding+sidePadding))
-	border.Push(pixel.V(h.w()-sidePadding, h.h()-sidePadding))
-	border.Rectangle(1)
-	border.Draw(h.win)
-
 	env.ForEachGameObject(h.drawGameObject)
 	h.drawGameBottomPanel(env.HP())
 }
@@ -139,15 +136,19 @@ func (h *Handler) drawGameBottomPanel(hp int) {
 }
 
 func (h *Handler) toLocalSpace(v game.Vector2) game.Vector2 {
-	return game.Vector2{X: v.X/h.w()*2 - 1, Y: v.Y/h.h()*2 - 1}
+	var aspectRatio = h.w() / h.h()
+	return game.Vector2{X: v.X/h.w()*2 - 1*aspectRatio, Y: v.Y/h.h()*2 - 1}
 }
 
+// Converts a point from local space to global space (i.e. screen space)
 func (h *Handler) toGlobalSpace(v game.Vector2) game.Vector2 {
-	return game.Vector2{X: (v.X + 1) * h.w() / 2, Y: (v.Y + 1) * h.h() / 2}
+	var aspectRatio = h.w() / h.h()
+	return game.Vector2{X: (v.X + aspectRatio) * h.w() / 2 / aspectRatio, Y: (v.Y + 1) * h.h() / 2}
 }
 
 func (h *Handler) toGlobalUnits(v game.Vector2) game.Vector2 {
-	return game.Vector2{X: v.X * h.w() / 2, Y: v.Y * h.h() / 2}
+	var aspectRatio = h.w() / h.h()
+	return game.Vector2{X: v.X * h.w() / 2 / aspectRatio, Y: v.Y * h.h() / 2}
 }
 
 func (h *Handler) drawGameObject(obj game.Object) {
