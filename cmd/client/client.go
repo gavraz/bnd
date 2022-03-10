@@ -12,7 +12,7 @@ func run() {
 	app := &application{}
 	app.Init()
 	last := time.Now()
-	for !app.Closed() {
+	for app.Running() {
 		dt := time.Since(last).Seconds()
 		last = time.Now()
 		app.HandleInput()

@@ -79,8 +79,8 @@ func (a *application) Draw() {
 	}
 }
 
-func (a *application) Closed() bool {
-	return a.displayHandler.Closed()
+func (a *application) Running() bool {
+	return !a.displayHandler.Closed()
 }
 
 func (a *application) changeResolution(width, height int) {
