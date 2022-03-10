@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"strings"
 )
 
 type choicer interface {
@@ -39,15 +40,14 @@ func NewHandler() *Handler {
 	return &Handler{}
 }
 
-var face, faceOutline font.Face
+var fontFace font.Face
 
 func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	var err error
 	h.win, err = pixelgl.NewWindow(cfg)
 	h.win.SetSmooth(true)
 
-	face, _ = loadOTF("graphics/pixel/fonts/Rase-GPL.otf", 72)
-	faceOutline, _ = loadOTF("graphics/pixel/fonts/Rase-GPL-Outline.otf", 72)
+	fontFace, _ = loadTTF("graphics/pixel/fonts/Mario-Kart-DS.ttf", 72)
 
 	if err != nil {
 		panic(err)
@@ -75,10 +75,9 @@ func (h *Handler) h() float64 {
 }
 
 func (h *Handler) DrawMainMenu(c choicer) {
-	h.win.Clear(colornames.Skyblue)
+	h.win.Clear(color.RGBA{R: 10, G: 30, B: 30, A: 255})
 
-	h.drawMenuText(c, faceOutline, colornames.Black, colornames.Black)
-	h.drawMenuText(c, face, colornames.Red, colornames.White)
+	h.drawMenuText(c, fontFace, colornames.Red, colornames.White)
 }
 
 func (h *Handler) DrawPauseMenu(c choicer) {
@@ -94,8 +93,7 @@ func (h *Handler) DrawPauseMenu(c choicer) {
 	imd.Rectangle(0)
 	imd.Draw(h.win)
 
-	h.drawMenuText(c, face, colornames.Red, colornames.White)
-	h.drawMenuText(c, faceOutline, colornames.Black, colornames.Black)
+	h.drawMenuText(c, fontFace, colornames.Red, colornames.White)
 }
 
 func (h *Handler) drawMenuText(c choicer, fontface font.Face, highlighted color.Color, normal color.Color) {
@@ -103,7 +101,6 @@ func (h *Handler) drawMenuText(c choicer, fontface font.Face, highlighted color.
 	var v game.Vector2
 	v = h.toGlobalSpace(v)
 	txt := text.New(pixel.V(v.X, v.Y), atlas)
-	txt.LineHeight = txt.LineHeight * 1.2
 	current := c.CurrentChoice()
 	for i, item := range c.Choices() {
 		if i == current {
@@ -111,9 +108,9 @@ func (h *Handler) drawMenuText(c choicer, fontface font.Face, highlighted color.
 		} else {
 			txt.Color = normal
 		}
-		_, _ = fmt.Fprintln(txt, item)
+		_, _ = fmt.Fprintln(txt, strings.ToLower(item)) // this 'Mario-Kart-DS' font is different for upper and lower
 	}
-	txt.Draw(h.win, pixel.IM.Moved(pixel.V(-txt.Bounds().W()/2, txt.Bounds().H()/2)).Scaled(txt.Orig, math.Max(1-txt.Bounds().W()/h.win.Bounds().W(), 0.25)))
+	txt.Draw(h.win, pixel.IM.Moved(pixel.V(-txt.Bounds().W()/2, txt.Bounds().H()/2)).Scaled(txt.Orig, math.Max(1-txt.Bounds().W()/h.win.Bounds().W(), 0.5)))
 }
 
 func (h *Handler) Pressed(key input.Key) bool {
