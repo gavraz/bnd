@@ -24,17 +24,18 @@ const (
 	playerRight
 	menuUp
 	menuDown
-	esc
-	enter
+	menuBack
+	menuEnter
+	pauseGame
 )
 
 type Controller struct {
-	mappings map[action]Key
+	actionToKey map[action]Key
 }
 
 func NewController() *Controller {
 	c := &Controller{
-		mappings: map[action]Key{},
+		actionToKey: map[action]Key{},
 	}
 
 	c.setDefault()
@@ -42,35 +43,36 @@ func NewController() *Controller {
 }
 
 func (c *Controller) setDefault() {
-	c.mappings[playerUp] = KeyW
-	c.mappings[playerDown] = KeyS
-	c.mappings[playerLeft] = KeyA
-	c.mappings[playerRight] = KeyD
-	c.mappings[menuUp] = KeyW
-	c.mappings[menuDown] = KeyS
-	c.mappings[esc] = KeyEsc
-	c.mappings[enter] = KeyEnter
+	c.actionToKey[playerUp] = KeyW
+	c.actionToKey[playerDown] = KeyS
+	c.actionToKey[playerLeft] = KeyA
+	c.actionToKey[playerRight] = KeyD
+	c.actionToKey[menuUp] = KeyW
+	c.actionToKey[menuDown] = KeyS
+	c.actionToKey[menuBack] = KeyEsc
+	c.actionToKey[menuEnter] = KeyEnter
+	c.actionToKey[pauseGame] = KeyEsc
 }
 
 type movePlayerFunc func(direction game.Direction)
 
-func (c *Controller) HandleGameInput(isPressed func(key Key) bool, pauseGame func(), movePlayer movePlayerFunc) {
+func (c *Controller) HandleGameInput(isPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc) {
 	var dir game.Direction
 
-	if isPressed(c.mappings[playerUp]) {
+	if isPressed(c.actionToKey[playerUp]) {
 		dir.Up()
 	}
-	if isPressed(c.mappings[playerDown]) {
+	if isPressed(c.actionToKey[playerDown]) {
 		dir.Down()
 	}
-	if isPressed(c.mappings[playerLeft]) {
+	if isPressed(c.actionToKey[playerLeft]) {
 		dir.Left()
 	}
-	if isPressed(c.mappings[playerRight]) {
+	if isPressed(c.actionToKey[playerRight]) {
 		dir.Right()
 	}
-	if isPressed(c.mappings[esc]) {
-		pauseGame()
+	if isPressed(c.actionToKey[pauseGame]) {
+		pause()
 	}
 
 	movePlayer(dir)
@@ -84,16 +86,16 @@ type menuHandler interface {
 }
 
 func (c *Controller) HandleMenuInput(isPressed func(key Key) bool, menuHandler menuHandler) {
-	if isPressed(c.mappings[menuDown]) {
+	if isPressed(c.actionToKey[menuDown]) {
 		menuHandler.NextChoice()
 	}
-	if isPressed(c.mappings[menuUp]) {
+	if isPressed(c.actionToKey[menuUp]) {
 		menuHandler.PrevChoice()
 	}
-	if isPressed(c.mappings[enter]) {
+	if isPressed(c.actionToKey[menuEnter]) {
 		menuHandler.Choose()
 	}
-	if isPressed(c.mappings[esc]) {
+	if isPressed(c.actionToKey[menuBack]) {
 		menuHandler.GoBack()
 	}
 }
