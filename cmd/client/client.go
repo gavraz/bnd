@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/faiface/pixel/pixelgl"
+	"time"
 )
 
 func run() {
@@ -13,7 +12,7 @@ func run() {
 	app := &application{}
 	app.Init()
 	last := time.Now()
-	for !app.Running() {
+	for !app.Closed() {
 		dt := time.Since(last).Seconds()
 		last = time.Now()
 		app.HandleInput()

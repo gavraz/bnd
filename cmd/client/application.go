@@ -70,15 +70,16 @@ func (a *application) Update(dt float64) {
 func (a *application) Draw() {
 	switch a.state {
 	case stateMainMenu:
-		a.displayHandler.DrawMenu(a.mainMenuHandler)
+		a.displayHandler.DrawMainMenu(a.mainMenuHandler)
 	case statePauseMenu:
-		a.displayHandler.DrawMenu(a.pauseMenuHandler)
+		a.displayHandler.DrawGame(a.gameManager)
+		a.displayHandler.DrawPauseMenu(a.pauseMenuHandler)
 	case stateGame:
 		a.displayHandler.DrawGame(a.gameManager)
 	}
 }
 
-func (a *application) Running() bool {
+func (a *application) Closed() bool {
 	return a.displayHandler.Closed()
 }
 

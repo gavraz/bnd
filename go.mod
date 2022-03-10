@@ -4,8 +4,9 @@ go 1.17
 
 require (
 	github.com/gavraz/menu v0.0.0-20220223105155-27b4b002f922
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/nsf/termbox-go v1.1.1
-	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
+	golang.org/x/image v0.0.0-20220302094943-723b81ca9867
 )
 
 require (
@@ -15,10 +16,10 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210410170116-ea3d685f79fb // indirect
 	github.com/go-gl/mathgl v0.0.0-20190416160123-c4601bc793c7 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
+	golang.org/x/text v0.3.6 // indirect
 )
 
 require (
 	github.com/faiface/pixel v0.10.0
-	github.com/g3n/engine v0.2.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 )
