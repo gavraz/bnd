@@ -162,16 +162,8 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		playerSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
-
-		switch obj.GetCollisionType() {
-		case game.Circle:
-			imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
-			imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
-		case game.Rectangle:
-			imd.Push(pixel.V(playerCenter.X-playerSize.X/2, playerCenter.Y-playerSize.Y/2))
-			imd.Push(pixel.V(playerCenter.X+playerSize.X/2, playerCenter.Y+playerSize.Y/2))
-			imd.Rectangle(0)
-		}
+		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
+		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
 
 		imd.Draw(h.win)
 	case game.Crate:
@@ -191,6 +183,19 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Push(pixel.V(wallCenter.X-wallSize.X/2, wallCenter.Y-wallSize.Y/2))
 		imd.Push(pixel.V(wallCenter.X+wallSize.X/2, wallCenter.Y+wallSize.Y/2))
 		imd.Rectangle(0)
+		imd.Draw(h.win)
+	case game.Fart:
+		fartCenter := h.toGlobalSpace(obj.GetCenter())
+		fartSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		imd := imdraw.New(nil)
+		imd.Color = color.RGBA{
+			R: 0,
+			G: 100,
+			B: 0,
+			A: 100,
+		}
+		imd.Push(pixel.V(fartCenter.X, fartCenter.Y))
+		imd.Ellipse(pixel.Vec{X: fartSize.X / 2, Y: fartSize.Y / 2}, 0)
 		imd.Draw(h.win)
 	default:
 		fmt.Println("pixel: drawing unimplemented for type")

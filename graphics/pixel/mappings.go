@@ -19,6 +19,8 @@ func toPixel(key input.Key) pixelgl.Button {
 		return pixelgl.KeyEscape
 	case input.KeyEnter:
 		return pixelgl.KeyEnter
+	case input.KeySpace:
+		return pixelgl.KeySpace
 	default:
 		return pixelgl.KeyUnknown
 	}

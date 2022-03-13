@@ -10,6 +10,10 @@ func CheckDynamicCollision(obj, other DynamicObject) Object {
 		r2 := other.GetWidth() / 2
 		dist := p1.Distance(p2)
 		if dist <= r1+r2 {
+			if obj.GetIsPassthrough() || other.GetIsPassthrough() {
+				return other
+			}
+
 			n := p1.Sub(p2).Normalize()
 			v1 := obj.GetVelocity()
 			v2 := other.GetVelocity()
@@ -45,6 +49,10 @@ func CheckDynamicCollision(obj, other DynamicObject) Object {
 		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
 
 		if penetrationDepth > 0.0 {
+			if circle.GetIsPassthrough() || rect.GetIsPassthrough() {
+				return other
+			}
+
 			if circle.GetVelocity().Dot(dist) < 0 {
 				tangentVel := dist.Normalize().Dot(circle.GetVelocity())
 				combinedMass := circle.GetMass() + rect.GetMass()
@@ -70,6 +78,10 @@ func CheckDynamicCollision(obj, other DynamicObject) Object {
 			return nil
 		} else {
 			// Collision
+			if obj.GetIsPassthrough() || other.GetIsPassthrough() {
+				return other
+			}
+
 			overlapX := math.Min(p1.X+w1/2, p2.X+w2/2) - math.Max(p1.X-w1/2, p2.X-w2/2)
 			overlapY := math.Min(p1.Y+h1/2, p2.Y+h2/2) - math.Max(p1.Y-h1/2, p2.Y-h2/2)
 			u1 := v1.MulScalar(m1 - m2).Add(v2.MulScalar(2 * m2)).DivScalar(m1 + m2)
@@ -112,6 +124,10 @@ func CheckStaticCollision(obj DynamicObject, other StaticObject) Object {
 		r2 := other.GetWidth() / 2
 		dist := p1.Distance(p2)
 		if dist <= r1+r2 {
+			if obj.GetIsPassthrough() {
+				return other
+			}
+
 			n := p1.Sub(p2).Normalize()
 			v1 := obj.GetVelocity()
 			u1 := n.MulScalar(v1.Length())
@@ -133,6 +149,10 @@ func CheckStaticCollision(obj DynamicObject, other StaticObject) Object {
 		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
 
 		if penetrationDepth > 0.0 {
+			if obj.GetIsPassthrough() {
+				return other
+			}
+
 			if circle.GetVelocity().Dot(dist) < 0 {
 				tangentVel := dist.Normalize().Dot(circle.GetVelocity())
 				circle.SetVelocity(circle.GetVelocity().Sub(dist.Normalize().MulScalar(tangentVel * 2)))
@@ -152,6 +172,10 @@ func CheckStaticCollision(obj DynamicObject, other StaticObject) Object {
 		penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
 
 		if penetrationDepth > 0.0 {
+			if obj.GetIsPassthrough() {
+				return other
+			}
+
 			tangentVel := dist.Normalize().Dot(rect.GetVelocity())
 			rect.SetVelocity(rect.GetVelocity().Sub(dist.Normalize().MulScalar(tangentVel * 2)))
 			rect.SetCenter(rect.GetCenter().Add(penetrationVector))
@@ -169,6 +193,10 @@ func CheckStaticCollision(obj DynamicObject, other StaticObject) Object {
 			return nil
 		} else {
 			// Collision
+			if obj.GetIsPassthrough() {
+				return other
+			}
+
 			overlapX := math.Min(p1.X+w1/2, p2.X+w2/2) - math.Max(p1.X-w1/2, p2.X-w2/2)
 			overlapY := math.Min(p1.Y+h1/2, p2.Y+h2/2) - math.Max(p1.Y-h1/2, p2.Y-h2/2)
 

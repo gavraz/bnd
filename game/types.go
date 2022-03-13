@@ -6,6 +6,7 @@ const (
 	Player ObjType = iota
 	Crate
 	Wall
+	Fart
 )
 
 func ObjectType(object Object) ObjType {
@@ -16,6 +17,8 @@ func ObjectType(object Object) ObjType {
 		return Crate
 	case *wall:
 		return Wall
+	case *fart:
+		return Fart
 	default:
 		panic("unknown object type")
 	}

@@ -1,6 +1,8 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	playerVelocityDecay = 4.0
@@ -29,6 +31,11 @@ func (m *Manager) AddStaticObject(name string, object StaticObject) {
 func (m *Manager) ForEachGameObject(do func(object Object)) {
 	for _, obj := range m.dynamicObjects {
 		do(obj)
+		if obj.GetChildren() != nil {
+			for _, child := range obj.GetChildren() {
+				do(child)
+			}
+		}
 	}
 	for _, obj := range m.staticObjects {
 		do(obj)
@@ -40,22 +47,40 @@ func (m *Manager) HP() int {
 }
 
 func (m *Manager) resolveDynamicCollisions(obj DynamicObject) Object {
+
 	for _, other := range m.dynamicObjects {
+		for _, child := range obj.GetChildren() {
+			if Object(other) == child {
+				goto IsChild
+			}
+		}
+		for _, child := range other.GetChildren() {
+			if Object(obj) == child {
+				goto IsChild
+			}
+		}
 		if other == obj {
 			continue
 		}
 		if collider := CheckDynamicCollision(obj, other); collider != nil {
 			return collider
 		}
+	IsChild:
 	}
 	return nil
 }
 
 func (m *Manager) resolveStaticCollisions(obj DynamicObject) Object {
 	for _, other := range m.staticObjects {
+		for _, child := range obj.GetChildren() {
+			if Object(other) == child {
+				goto IsChild
+			}
+		}
 		if collider := CheckStaticCollision(obj, other); collider != nil {
 			return collider
 		}
+	IsChild:
 	}
 	return nil
 }
@@ -66,18 +91,18 @@ func (m *Manager) InitGame() {
 			X: 0,
 			Y: 0,
 		},
-		BaseSpeed:     3,
+		BaseSpeed:     5,
 		CollisionType: Circle,
 		Width:         0.05,
 		Height:        0.05,
-		Mass:          2,
+		Mass:          1,
 	}, 100))
 	m.AddStaticObject("enemy-player", NewPlayer(&GObject{
 		Center: Vector2{
 			X: 0.2,
 			Y: 0.3,
 		},
-		BaseSpeed:     3,
+		BaseSpeed:     1,
 		CollisionType: Circle,
 		Width:         0.2,
 		Height:        0.2,
@@ -103,7 +128,7 @@ func (m *Manager) InitGame() {
 			CollisionType: Rectangle,
 			Width:         0.2,
 			Height:        0.2,
-			Mass:          10,
+			Mass:          2,
 		},
 	})
 	m.AddStaticObject("wall-bottom", &wall{
@@ -155,9 +180,11 @@ func (m *Manager) InitGame() {
 
 func (m *Manager) Update(dt float64) {
 	for _, obj := range m.dynamicObjects {
-		obj.UpdateVelocity(dt)
+		if obj.GetParent() != nil {
+			continue
+		}
 		obj.ApplyFriction(playerVelocityDecay, dt)
-		obj.MoveObject(dt)
+		obj.Update(dt)
 
 		if collider := m.resolveDynamicCollisions(obj); collider != nil {
 			fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
@@ -171,7 +198,7 @@ func (m *Manager) Update(dt float64) {
 func (m *Manager) MovePlayer(dir Direction) {
 	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
-	playerObj.SetAcceleration(dirToVec2(dir).MulScalar(curSpeed))
+	playerObj.AddForce(dirToVec2(dir).MulScalar(curSpeed))
 }
 
 func (m *Manager) ResetGame() {
@@ -182,4 +209,34 @@ func (m *Manager) ResetGame() {
 func (m *Manager) clearGameData() {
 	m.dynamicObjects = make(map[string]DynamicObject)
 	m.staticObjects = make(map[string]StaticObject)
+}
+
+func (m *Manager) Fart(dt float64) {
+	fart := &fart{
+		DynamicObject: &GObject{
+			CollisionType: Circle,
+			ParentObject:  m.dynamicObjects["current-player"],
+			Center:        m.dynamicObjects["current-player"].GetCenter(),
+			Width:         0.5,
+			Height:        0.5,
+			IsPassthrough: true,
+			TimeToLive:    0.2,
+		},
+	}
+	m.dynamicObjects["current-player"].AddChild(fart)
+	m.pushAwayObjects(m.dynamicObjects["current-player"], 0.3, dt)
+}
+
+func (m *Manager) pushAwayObjects(pusherObject DynamicObject, dist float64, dt float64) {
+	for _, obj := range m.dynamicObjects {
+		if pusherObject == obj {
+			continue
+		}
+		if obj.GetCenter().Distance(pusherObject.GetCenter()) > dist {
+			continue
+		}
+		pushVector := obj.GetCenter().Sub(pusherObject.GetCenter()).Normalize().DivScalar(dt)
+		obj.AddForce(pushVector)
+	}
+
 }

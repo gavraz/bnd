@@ -106,7 +106,7 @@ func (v Vector2) Angle() float64 {
 }
 
 func (v Vector2) AngleTo(other Vector2) float64 {
-	return math.Atan2(other.Y-v.Y, other.X-v.X)
+	return math.Atan2(other.Y, other.X) - math.Atan2(v.Y, v.X)
 }
 
 func (v Vector2) Rotate(angle float64) Vector2 {
