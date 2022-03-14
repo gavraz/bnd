@@ -5,17 +5,17 @@ type Direction struct {
 }
 
 func (d *Direction) Up() {
-	d.v.Y = 1
+	d.v.Y += 1
 }
 
 func (d *Direction) Down() {
-	d.v.Y = -1
+	d.v.Y += -1
 }
 
 func (d *Direction) Left() {
-	d.v.X = -1
+	d.v.X += -1
 }
 
 func (d *Direction) Right() {
-	d.v.X = 1
+	d.v.X += 1
 }
