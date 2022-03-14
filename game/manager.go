@@ -198,7 +198,7 @@ func (m *Manager) Update(dt float64) {
 func (m *Manager) MovePlayer(dir Direction) {
 	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
-	playerObj.AddForce(dir.v.MulScalar(curSpeed))
+	playerObj.AddForce(dir.Get().MulScalar(curSpeed))
 }
 
 func (m *Manager) ResetGame() {
