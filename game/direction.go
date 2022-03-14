@@ -19,7 +19,3 @@ func (d *Direction) Left() {
 func (d *Direction) Right() {
 	d.v.X += 1
 }
-
-func (d *Direction) Get() Vector2 {
-	return d.v
-}

@@ -29,10 +29,6 @@ type wall struct {
 	StaticObject
 }
 
-type bullet struct {
-	DynamicObject
-}
-
 type fart struct {
 	DynamicObject
 }

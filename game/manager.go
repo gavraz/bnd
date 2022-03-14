@@ -47,40 +47,53 @@ func (m *Manager) HP() int {
 }
 
 func (m *Manager) resolveDynamicCollisions(obj DynamicObject) Object {
-
+	var isChild bool
 	for _, other := range m.dynamicObjects {
+		isChild = false
+		if other == obj {
+			continue
+		}
 		for _, child := range obj.GetChildren() {
 			if Object(other) == child {
-				goto IsChild
+				isChild = true
+				break
 			}
+		}
+		if isChild {
+			continue
 		}
 		for _, child := range other.GetChildren() {
 			if Object(obj) == child {
-				goto IsChild
+				isChild = true
+				break
 			}
 		}
-		if other == obj {
+		if isChild {
 			continue
 		}
 		if collider := CheckDynamicCollision(obj, other); collider != nil {
 			return collider
 		}
-	IsChild:
 	}
 	return nil
 }
 
 func (m *Manager) resolveStaticCollisions(obj DynamicObject) Object {
+	var isChild bool
 	for _, other := range m.staticObjects {
+		isChild = false
 		for _, child := range obj.GetChildren() {
 			if Object(other) == child {
-				goto IsChild
+				isChild = true
+				break
 			}
+		}
+		if isChild {
+			continue
 		}
 		if collider := CheckStaticCollision(obj, other); collider != nil {
 			return collider
 		}
-	IsChild:
 	}
 	return nil
 }
@@ -198,7 +211,7 @@ func (m *Manager) Update(dt float64) {
 func (m *Manager) MovePlayer(dir Direction) {
 	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
-	playerObj.AddForce(dir.Get().MulScalar(curSpeed))
+	playerObj.AddForce(dir.v.MulScalar(curSpeed))
 }
 
 func (m *Manager) ResetGame() {

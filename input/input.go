@@ -23,7 +23,7 @@ const (
 	playerDown
 	playerLeft
 	playerRight
-	playerSpace
+	playerAbility
 	menuUp
 	menuDown
 	menuBack
@@ -54,7 +54,7 @@ func (c *Controller) setDefault() {
 	c.actionToKey[menuBack] = KeyEsc
 	c.actionToKey[menuEnter] = KeyEnter
 	c.actionToKey[pauseGame] = KeyEsc
-	c.actionToKey[playerSpace] = KeySpace
+	c.actionToKey[playerAbility] = KeySpace
 }
 
 type movePlayerFunc func(direction game.Direction)
@@ -77,7 +77,7 @@ func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed f
 	if isPressed(c.actionToKey[pauseGame]) {
 		pause()
 	}
-	if justPressed(c.actionToKey[playerSpace]) {
+	if justPressed(c.actionToKey[playerAbility]) {
 		fart(dt)
 	}
 
