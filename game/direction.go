@@ -1,41 +1,21 @@
 package game
 
 type Direction struct {
-	up    bool
-	down  bool
-	left  bool
-	right bool
+	v Vector2
 }
 
 func (d *Direction) Up() {
-	d.up = true
+	d.v.Y = 1
 }
 
 func (d *Direction) Down() {
-	d.down = true
+	d.v.Y = -1
 }
 
 func (d *Direction) Left() {
-	d.left = true
+	d.v.X = -1
 }
 
 func (d *Direction) Right() {
-	d.right = true
-}
-
-func dirToVec2(d Direction) Vector2 {
-	var x, y float64
-	if d.up {
-		y++
-	}
-	if d.down {
-		y--
-	}
-	if d.left {
-		x--
-	}
-	if d.right {
-		x++
-	}
-	return Vector2{X: x, Y: y}
+	d.v.X = 1
 }

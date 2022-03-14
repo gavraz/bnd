@@ -41,6 +41,8 @@ func NewHandler() *Handler {
 }
 
 var fontFace font.Face
+var backgroundImage pixel.Picture
+var backgroundSprite *pixel.Sprite
 
 func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	var err error
@@ -48,6 +50,8 @@ func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	h.win.SetSmooth(true)
 
 	fontFace, _ = loadTTF("graphics/pixel/fonts/Mario-Kart-DS.ttf", 72)
+	backgroundImage, _ = loadPicture("graphics/pixel/images/img.png")
+	backgroundSprite = pixel.NewSprite(backgroundImage, backgroundImage.Bounds())
 
 	if err != nil {
 		panic(err)
@@ -63,6 +67,7 @@ func (h *Handler) Closed() bool {
 }
 
 func (h *Handler) Update() {
+
 	h.win.Update()
 }
 
@@ -76,7 +81,7 @@ func (h *Handler) h() float64 {
 
 func (h *Handler) DrawMainMenu(c choicer) {
 	h.win.Clear(color.RGBA{R: 10, G: 30, B: 30, A: 255})
-
+	backgroundSprite.Draw(h.win, pixel.IM.Moved(h.win.Bounds().Center()))
 	h.drawMenuText(c, fontFace, colornames.Red, colornames.White)
 }
 
@@ -129,6 +134,7 @@ func (h *Handler) DrawGame(env Environmenter) {
 }
 
 func (h *Handler) drawGameBottomPanel(hp int) {
+
 	basicAtlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
 	basicTxt := text.New(pixel.V(h.w()*0.02, h.h()*0.1), basicAtlas)
 	_, _ = fmt.Fprintln(basicTxt, "HP: ", hp)
