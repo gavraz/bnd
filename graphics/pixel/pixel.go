@@ -45,7 +45,9 @@ func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	h.win, err = pixelgl.NewWindow(cfg)
 	h.win.SetSmooth(true)
 
-	loadAssets()
+	fontFace, _ = loadTTF("graphics/pixel/fonts/Mario-Kart-DS.ttf", 72)
+	backgroundImage, _ = loadPicture("graphics/pixel/images/img.png")
+	backgroundSprite = pixel.NewSprite(backgroundImage, backgroundImage.Bounds())
 
 	if err != nil {
 		panic(err)
@@ -166,6 +168,14 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
 
 		imd.Draw(h.win)
+	case game.MeleeObject:
+		meleeCenter := h.toGlobalSpace(obj.GetCenter())
+		meleeSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		imd := imdraw.New(nil)
+		imd.Color = colornames.Darkgrey
+		imd.Push(pixel.V(meleeCenter.X, meleeCenter.Y))
+		imd.Ellipse(pixel.Vec{X: meleeSize.X / 2, Y: meleeSize.Y / 2}, 0)
+		imd.Draw(h.win)
 	case game.Crate:
 		crateCenter := h.toGlobalSpace(obj.GetCenter())
 		crateSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
@@ -208,7 +218,12 @@ func loadPicture(path string) (pixel.Picture, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {}(file)
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
 	img, _, err := image.Decode(file)
 	if err != nil {
 		return nil, err
@@ -222,7 +237,12 @@ func loadTTF(path string, size float64) (font.Face, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {}(file)
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -246,7 +266,12 @@ func loadOTF(path string, size float64) (font.Face, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {}(file)
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(file)
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {

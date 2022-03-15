@@ -60,7 +60,7 @@ func (a *application) HandleInput(dt float64) {
 			a.displayHandler.JustPressed,
 			a.PauseGame,
 			a.gameManager.MovePlayer,
-			a.gameManager.Fart,
+			a.gameManager.Attack,
 			dt)
 	}
 }

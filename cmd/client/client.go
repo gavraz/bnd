@@ -8,7 +8,6 @@ import (
 
 func run() {
 	fmt.Println("Client: Hello B&D")
-
 	app := &application{}
 	app.Init()
 	last := time.Now()

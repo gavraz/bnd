@@ -3,7 +3,6 @@ package game
 import (
 	//v "bnd/vector_pointers"
 	v "bnd/vector"
-	"time"
 )
 
 type Ability int
@@ -51,8 +50,11 @@ type DynamicObject interface {
 	SetBaseSpeed(s float64)
 	GetMass() float64
 	ApplyFriction(friction, dt float64)
+	SetDirection(dir Vector2)
+	GetDirection() Vector2
 	GetAppliedForce() Vector2
 	AddForce(force Vector2)
+	isDead() bool
 	UpdateTimeAlive(dt float64)
 	GetChildren() []DynamicObject
 	SetChildren(children []DynamicObject)
@@ -61,7 +63,6 @@ type DynamicObject interface {
 	GetParent() DynamicObject
 	RemoveParent()
 	RemoveChild(child DynamicObject)
-	IsAlive() bool
 }
 
 type GObject struct {
@@ -76,7 +77,7 @@ type GObject struct {
 	Acceleration  Vector2
 	Direction     Vector2
 	TimeAlive     float64
-	Until         time.Time
+	TimeToLive    float64
 	BaseSpeed     float64
 	Mass          float64
 	IsPassthrough bool
@@ -111,7 +112,7 @@ func (g *GObject) GetDirection() Vector2 {
 }
 
 func (g *GObject) SetDirection(d Vector2) {
-	g.Direction = d
+	g.Direction = d.Normalize()
 }
 
 func (g *GObject) GetVelocity() Vector2 {
@@ -126,13 +127,18 @@ func (g *GObject) Update(dt float64) {
 	g.Acceleration = g.AppliedForce.DivScalar(g.Mass)
 	g.Velocity = g.Velocity.Add(g.Acceleration.MulScalar(dt))
 	g.Center = g.Center.Add(g.Velocity.MulScalar(dt))
+	g.SetDirection(g.Velocity)
 	g.AppliedForce = Vector2{}
 
 	if g.GetChildren() != nil {
 		for _, child := range g.GetChildren() {
+			if ObjectType(child) == MeleeObject {
+				child.(*meleeObject).UpdateMelee(dt)
+			} else {
+				child.SetCenter(g.GetCenter()) // Only applies for fart atm
+			}
 			child.UpdateTimeAlive(dt)
-			child.SetCenter(g.GetCenter()) // Only applies for fart atm
-			if !child.IsAlive() {
+			if child.isDead() {
 				g.RemoveChild(child)
 				continue
 			}
@@ -143,7 +149,15 @@ func (g *GObject) Update(dt float64) {
 
 func (g *GObject) MoveObject(dt float64) {
 	//g.Center = g.Center.Add(g.Velocity.MulScalar(dt).Add(g.Acceleration.MulScalar(dt * dt / 2)))
-	g.Center = g.Center.Add(g.Velocity.MulScalar(dt))
+	moveVector := g.Velocity.MulScalar(dt)
+	prevCenter := g.Center
+	g.Center = g.Center.Add(moveVector)
+	children := g.GetChildren()
+	if children != nil {
+		for _, child := range g.GetChildren() {
+			child.SetCenter(child.GetCenter().Sub(prevCenter).Add(g.Center))
+		}
+	}
 }
 
 func (g *GObject) UpdateTimeAlive(dt float64) {
@@ -202,11 +216,8 @@ func (g *GObject) GetParent() DynamicObject {
 	return g.ParentObject
 }
 
-func (g *GObject) IsAlive() bool {
-	if g.Until.IsZero() {
-		return true
-	}
-	return time.Now().Before(g.Until)
+func (g *GObject) isDead() bool {
+	return g.TimeAlive > g.TimeToLive
 }
 
 func (g *GObject) RemoveChild(child DynamicObject) {

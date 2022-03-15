@@ -2,6 +2,7 @@ package input
 
 import (
 	"bnd/game"
+	"time"
 )
 
 type Key int
@@ -57,10 +58,10 @@ func (c *Controller) setDefault() {
 	c.actionToKey[playerAbility] = KeySpace
 }
 
-type movePlayerFunc func(direction game.Direction)
+type movePlayerFunc func(direction game.MoveDirection)
 
-func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, fart func(dt float64), dt float64) {
-	var dir game.Direction
+func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, attack func(), dt float64) {
+	var dir game.MoveDirection
 
 	if isPressed(c.actionToKey[playerUp]) {
 		dir.Up()
@@ -78,7 +79,13 @@ func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed f
 		pause()
 	}
 	if justPressed(c.actionToKey[playerAbility]) {
-		fart(dt)
+		attack()
+		go func() {
+			for i := 0; i < 1; i++ {
+
+				time.Sleep(100 * time.Millisecond)
+			}
+		}()
 	}
 
 	movePlayer(dir)

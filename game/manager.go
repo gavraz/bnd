@@ -2,7 +2,7 @@ package game
 
 import (
 	"fmt"
-	"time"
+	"math"
 )
 
 const (
@@ -30,13 +30,19 @@ func (m *Manager) AddStaticObject(name string, object StaticObject) {
 }
 
 func (m *Manager) ForEachGameObject(do func(object Object)) {
-	for _, obj := range m.dynamicObjects {
-		do(obj)
-		if obj.GetChildren() != nil {
-			for _, child := range obj.GetChildren() {
+	var LoopChildren func(parent DynamicObject)
+	LoopChildren = func(parent DynamicObject) {
+		children := parent.GetChildren()
+		if children != nil {
+			for _, child := range children {
 				do(child)
+				LoopChildren(child)
 			}
 		}
+	}
+	for _, obj := range m.dynamicObjects {
+		do(obj)
+		LoopChildren(obj)
 	}
 	for _, obj := range m.staticObjects {
 		do(obj)
@@ -105,11 +111,12 @@ func (m *Manager) InitGame() {
 			X: 0,
 			Y: 0,
 		},
-		BaseSpeed:     5,
+		BaseSpeed:     2,
 		CollisionType: Circle,
 		Width:         0.05,
 		Height:        0.05,
 		Mass:          1,
+		Direction:     Vector2{0, 1},
 	}, 100))
 	m.AddStaticObject("enemy-player", NewPlayer(&GObject{
 		Center: Vector2{
@@ -198,6 +205,7 @@ func (m *Manager) Update(dt float64) {
 			continue
 		}
 		obj.ApplyFriction(playerVelocityDecay, dt)
+		obj.MoveObject(dt)
 		obj.Update(dt)
 
 		if collider := m.resolveDynamicCollisions(obj); collider != nil {
@@ -209,7 +217,7 @@ func (m *Manager) Update(dt float64) {
 	}
 }
 
-func (m *Manager) MovePlayer(dir Direction) {
+func (m *Manager) MovePlayer(dir MoveDirection) {
 	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
 	playerObj.AddForce(dir.v.MulScalar(curSpeed))
@@ -234,11 +242,28 @@ func (m *Manager) Fart(dt float64) {
 			Width:         0.5,
 			Height:        0.5,
 			IsPassthrough: true,
-			Until:         time.Now().Add(100 * time.Millisecond),
+			TimeToLive:    0.2,
 		},
 	}
 	m.dynamicObjects["current-player"].AddChild(fart)
 	m.pushAwayObjects(m.dynamicObjects["current-player"], 0.3, dt)
+}
+
+func (m *Manager) Attack() {
+	lifeTime := 0.15
+	radius := 0.1
+	size := 0.01
+	user := m.dynamicObjects["current-player"]
+	sword := NewMeleeObject(&GObject{
+		CollisionType: Circle,
+		Width:         size,
+		Height:        size,
+		Mass:          1,
+		ParentObject:  user,
+		TimeToLive:    lifeTime,
+		IsPassthrough: true,
+	}, user.GetDirection(), user.GetCenter(), user.GetWidth(), math.Pi/4, lifeTime, size, radius)
+	m.dynamicObjects["current-player"].AddChild(sword)
 }
 
 func (m *Manager) pushAwayObjects(pusherObject DynamicObject, dist float64, dt float64) {
