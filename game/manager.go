@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
@@ -233,7 +234,7 @@ func (m *Manager) Fart(dt float64) {
 			Width:         0.5,
 			Height:        0.5,
 			IsPassthrough: true,
-			TimeToLive:    0.2,
+			Until:         time.Now().Add(100 * time.Millisecond),
 		},
 	}
 	m.dynamicObjects["current-player"].AddChild(fart)

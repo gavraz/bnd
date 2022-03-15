@@ -40,18 +40,12 @@ func NewHandler() *Handler {
 	return &Handler{}
 }
 
-var fontFace font.Face
-var backgroundImage pixel.Picture
-var backgroundSprite *pixel.Sprite
-
 func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	var err error
 	h.win, err = pixelgl.NewWindow(cfg)
 	h.win.SetSmooth(true)
 
-	fontFace, _ = loadTTF("graphics/pixel/fonts/Mario-Kart-DS.ttf", 72)
-	backgroundImage, _ = loadPicture("graphics/pixel/images/img.png")
-	backgroundSprite = pixel.NewSprite(backgroundImage, backgroundImage.Bounds())
+	loadAssets()
 
 	if err != nil {
 		panic(err)
@@ -214,12 +208,7 @@ func loadPicture(path string) (pixel.Picture, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
+	defer func(file *os.File) {}(file)
 	img, _, err := image.Decode(file)
 	if err != nil {
 		return nil, err
@@ -233,12 +222,7 @@ func loadTTF(path string, size float64) (font.Face, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
+	defer func(file *os.File) {}(file)
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -262,12 +246,7 @@ func loadOTF(path string, size float64) (font.Face, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
+	defer func(file *os.File) {}(file)
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {

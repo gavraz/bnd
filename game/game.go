@@ -3,6 +3,7 @@ package game
 import (
 	//v "bnd/vector_pointers"
 	v "bnd/vector"
+	"time"
 )
 
 type Ability int
@@ -52,7 +53,6 @@ type DynamicObject interface {
 	ApplyFriction(friction, dt float64)
 	GetAppliedForce() Vector2
 	AddForce(force Vector2)
-	isDead() bool
 	UpdateTimeAlive(dt float64)
 	GetChildren() []DynamicObject
 	SetChildren(children []DynamicObject)
@@ -61,6 +61,7 @@ type DynamicObject interface {
 	GetParent() DynamicObject
 	RemoveParent()
 	RemoveChild(child DynamicObject)
+	IsAlive() bool
 }
 
 type GObject struct {
@@ -75,7 +76,7 @@ type GObject struct {
 	Acceleration  Vector2
 	Direction     Vector2
 	TimeAlive     float64
-	TimeToLive    float64
+	Until         time.Time
 	BaseSpeed     float64
 	Mass          float64
 	IsPassthrough bool
@@ -131,7 +132,7 @@ func (g *GObject) Update(dt float64) {
 		for _, child := range g.GetChildren() {
 			child.UpdateTimeAlive(dt)
 			child.SetCenter(g.GetCenter()) // Only applies for fart atm
-			if child.isDead() {
+			if !child.IsAlive() {
 				g.RemoveChild(child)
 				continue
 			}
@@ -201,8 +202,11 @@ func (g *GObject) GetParent() DynamicObject {
 	return g.ParentObject
 }
 
-func (g *GObject) isDead() bool {
-	return g.TimeAlive > g.TimeToLive
+func (g *GObject) IsAlive() bool {
+	if g.Until.IsZero() {
+		return true
+	}
+	return time.Now().Before(g.Until)
 }
 
 func (g *GObject) RemoveChild(child DynamicObject) {
