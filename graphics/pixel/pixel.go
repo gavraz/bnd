@@ -12,7 +12,6 @@ import (
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
-	"golang.org/x/image/font/opentype"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -45,9 +44,7 @@ func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	h.win, err = pixelgl.NewWindow(cfg)
 	h.win.SetSmooth(true)
 
-	fontFace, _ = loadTTF("graphics/pixel/fonts/Mario-Kart-DS.ttf", 72)
-	backgroundImage, _ = loadPicture("graphics/pixel/images/img.png")
-	backgroundSprite = pixel.NewSprite(backgroundImage, backgroundImage.Bounds())
+	loadAssets()
 
 	if err != nil {
 		panic(err)
@@ -218,12 +215,7 @@ func loadPicture(path string) (pixel.Picture, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
+	defer func(file *os.File) {}(file)
 	img, _, err := image.Decode(file)
 	if err != nil {
 		return nil, err
@@ -237,12 +229,7 @@ func loadTTF(path string, size float64) (font.Face, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
+	defer func(file *os.File) {}(file)
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -258,34 +245,4 @@ func loadTTF(path string, size float64) (font.Face, error) {
 		Size:              size,
 		GlyphCacheEntries: 1,
 	}), nil
-}
-
-// Loads a .otf font file into a usable font.Face format
-func loadOTF(path string, size float64) (font.Face, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
-
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	fnt, err := opentype.Parse(bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return opentype.NewFace(fnt, &opentype.FaceOptions{
-		Size:    size,
-		DPI:     72,
-		Hinting: 0,
-	})
 }
