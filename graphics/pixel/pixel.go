@@ -8,17 +8,12 @@ import (
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/faiface/pixel/text"
-	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
-	"golang.org/x/image/font/opentype"
-	"image"
 	"image/color"
 	_ "image/png"
-	"io/ioutil"
 	"math"
-	"os"
 	"strings"
 )
 
@@ -40,14 +35,12 @@ func NewHandler() *Handler {
 	return &Handler{}
 }
 
-var fontFace font.Face
-
 func (h *Handler) Init(cfg pixelgl.WindowConfig) {
 	var err error
 	h.win, err = pixelgl.NewWindow(cfg)
 	h.win.SetSmooth(true)
 
-	fontFace, _ = loadTTF("graphics/pixel/fonts/Mario-Kart-DS.ttf", 72)
+	loadAssets()
 
 	if err != nil {
 		panic(err)
@@ -63,6 +56,7 @@ func (h *Handler) Closed() bool {
 }
 
 func (h *Handler) Update() {
+
 	h.win.Update()
 }
 
@@ -76,7 +70,7 @@ func (h *Handler) h() float64 {
 
 func (h *Handler) DrawMainMenu(c choicer) {
 	h.win.Clear(color.RGBA{R: 10, G: 30, B: 30, A: 255})
-
+	backgroundSprite.Draw(h.win, pixel.IM.Moved(h.win.Bounds().Center()))
 	h.drawMenuText(c, fontFace, colornames.Red, colornames.White)
 }
 
@@ -129,6 +123,7 @@ func (h *Handler) DrawGame(env Environmenter) {
 }
 
 func (h *Handler) drawGameBottomPanel(hp int) {
+
 	basicAtlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
 	basicTxt := text.New(pixel.V(h.w()*0.02, h.h()*0.1), basicAtlas)
 	_, _ = fmt.Fprintln(basicTxt, "HP: ", hp)
@@ -162,16 +157,8 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		playerSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
-
-		switch obj.GetCollisionType() {
-		case game.Circle:
-			imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
-			imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
-		case game.Rectangle:
-			imd.Push(pixel.V(playerCenter.X-playerSize.X/2, playerCenter.Y-playerSize.Y/2))
-			imd.Push(pixel.V(playerCenter.X+playerSize.X/2, playerCenter.Y+playerSize.Y/2))
-			imd.Rectangle(0)
-		}
+		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
+		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
 
 		imd.Draw(h.win)
 	case game.Crate:
@@ -192,85 +179,20 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Push(pixel.V(wallCenter.X+wallSize.X/2, wallCenter.Y+wallSize.Y/2))
 		imd.Rectangle(0)
 		imd.Draw(h.win)
+	case game.Fart:
+		fartCenter := h.toGlobalSpace(obj.GetCenter())
+		fartSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		imd := imdraw.New(nil)
+		imd.Color = color.RGBA{
+			R: 0,
+			G: 100,
+			B: 0,
+			A: 100,
+		}
+		imd.Push(pixel.V(fartCenter.X, fartCenter.Y))
+		imd.Ellipse(pixel.Vec{X: fartSize.X / 2, Y: fartSize.Y / 2}, 0)
+		imd.Draw(h.win)
 	default:
 		fmt.Println("pixel: drawing unimplemented for type")
 	}
-}
-
-// Loads a picture into a usable pixel.Picture format
-func loadPicture(path string) (pixel.Picture, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-	return pixel.PictureDataFromImage(img), nil
-}
-
-// Loads a .ttf font file into a usable font.Face format
-func loadTTF(path string, size float64) (font.Face, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
-
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	fnt, err := truetype.Parse(bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return truetype.NewFace(fnt, &truetype.Options{
-		Size:              size,
-		GlyphCacheEntries: 1,
-	}), nil
-}
-
-// Loads a .otf font file into a usable font.Face format
-func loadOTF(path string, size float64) (font.Face, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(file)
-
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	fnt, err := opentype.Parse(bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return opentype.NewFace(fnt, &opentype.FaceOptions{
-		Size:    size,
-		DPI:     72,
-		Hinting: 0,
-	})
 }

@@ -49,14 +49,19 @@ func (a *application) Init() {
 	a.inputController = input.NewController()
 }
 
-func (a *application) HandleInput() {
+func (a *application) HandleInput(dt float64) {
 	switch a.state {
 	case stateMainMenu:
 		a.inputController.HandleMenuInput(a.displayHandler.JustPressed, a.mainMenuHandler)
 	case statePauseMenu:
 		a.inputController.HandleMenuInput(a.displayHandler.JustPressed, a.pauseMenuHandler)
 	case stateGame:
-		a.inputController.HandleGameInput(a.displayHandler.Pressed, a.PauseGame, a.gameManager.MovePlayer)
+		a.inputController.HandleGameInput(a.displayHandler.Pressed,
+			a.displayHandler.JustPressed,
+			a.PauseGame,
+			a.gameManager.MovePlayer,
+			a.gameManager.Fart,
+			dt)
 	}
 }
 

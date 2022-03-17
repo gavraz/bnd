@@ -15,7 +15,7 @@ func run() {
 	for app.Running() {
 		dt := time.Since(last).Seconds()
 		last = time.Now()
-		app.HandleInput()
+		app.HandleInput(dt)
 		app.Draw()
 		app.Update(dt)
 	}
