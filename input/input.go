@@ -14,6 +14,51 @@ const (
 	KeyEsc
 	KeyEnter
 	KeySpace
+	KeyLeft
+	KeyRight
+	KeyUp
+	KeyDown
+	KeyQ
+	KeyE
+	KeyR
+	KeyT
+	KeyY
+	KeyU
+	KeyI
+	KeyO
+	KeyP
+	KeyF
+	KeyG
+	KeyH
+	KeyJ
+	KeyK
+	KeyL
+	KeyZ
+	KeyX
+	KeyC
+	KeyV
+	KeyB
+	KeyN
+	KeyM
+	KeyLShift
+	KeyRShift
+	KeyLControl
+	KeyRControl
+	KeyLAlt
+	KeyRAlt
+	KeyBackspace
+	KeyTab
+	KeyCapsLock
+	Key0
+	Key1
+	Key2
+	Key3
+	Key4
+	Key5
+	Key6
+	Key7
+	Key8
+	Key9
 )
 
 type action int
