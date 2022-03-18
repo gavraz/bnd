@@ -25,7 +25,7 @@ func NewMeleeObject(obj DynamicObject, userDir Vector2, userCenter Vector2, user
 			Mass:          1,
 			Direction:     dir,
 			ParentObject:  obj,
-			Until:         time.Now().Add(time.Duration(lifeTime) * time.Second),
+			Until:         time.Now().Add(time.Duration(lifeTime*1000) * time.Millisecond),
 			IsPassthrough: true,
 		}, 0, 0, 1, 1}
 		obj.AddChild(sword)

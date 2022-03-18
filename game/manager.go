@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -250,7 +251,7 @@ func (m *Manager) Fart(dt float64) {
 }
 
 func (m *Manager) Attack() {
-	lifeTime := 1.0
+	lifeTime := 0.15
 	radius := 0.1
 	size := 0.01
 	user := m.dynamicObjects["current-player"]
@@ -260,7 +261,7 @@ func (m *Manager) Attack() {
 		Height:        size,
 		Mass:          1,
 		ParentObject:  user,
-		Until:         time.Now().Add(time.Duration(lifeTime) * time.Second),
+		Until:         time.Now().Add(time.Duration(lifeTime*1000) * time.Millisecond),
 		IsPassthrough: true,
 	}, user.GetDirection(), user.GetCenter(), user.GetWidth(), math.Pi/4, lifeTime, size, radius)
 	m.dynamicObjects["current-player"].AddChild(sword)
