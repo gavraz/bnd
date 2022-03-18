@@ -13,7 +13,6 @@ const (
 	KeyA
 	KeyEsc
 	KeyEnter
-	KeySpace
 )
 
 type action int

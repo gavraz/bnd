@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"math"
 	"time"
 )
 
