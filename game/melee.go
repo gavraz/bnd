@@ -1,5 +1,7 @@
 package game
 
+import "time"
+
 type meleeObject struct {
 	DynamicObject
 	angle    float64
@@ -23,7 +25,7 @@ func NewMeleeObject(obj DynamicObject, userDir Vector2, userCenter Vector2, user
 			Mass:          1,
 			Direction:     dir,
 			ParentObject:  obj,
-			TimeToLive:    lifeTime,
+			Until:         time.Now().Add(time.Duration(lifeTime) * time.Second),
 			IsPassthrough: true,
 		}, 0, 0, 1, 1}
 		obj.AddChild(sword)

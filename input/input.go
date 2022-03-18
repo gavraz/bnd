@@ -59,7 +59,7 @@ func (c *Controller) setDefault() {
 
 type movePlayerFunc func(direction game.MoveDirection)
 
-func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, attack func()) {
+func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, attack func(), dt float64) {
 	var dir game.MoveDirection
 
 	if isPressed(c.actionToKey[playerUp]) {
