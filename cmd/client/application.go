@@ -61,7 +61,7 @@ func (a *application) HandleInput(dt float64) {
 			a.PauseGame,
 			a.gameManager.MovePlayer,
 			a.gameManager.Fart,
-			a.gameManager.MeleeAttack,
+			a.gameManager.Melee,
 			dt)
 	}
 }

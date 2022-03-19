@@ -104,10 +104,10 @@ func (c *Controller) setDefault() {
 	c.actionToKey[playerMelee] = KeyLShift
 }
 
-type movePlayerFunc func(direction game.MoveDirection)
+type movePlayerFunc func(direction game.Direction)
 
-func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, fart func(dt float64), attack func(), dt float64) {
-	var dir game.MoveDirection
+func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, fart func(dt float64), melee func(), dt float64) {
+	var dir game.Direction
 
 	if isPressed(c.actionToKey[playerUp]) {
 		dir.Up()
@@ -128,7 +128,7 @@ func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed f
 		fart(dt)
 	}
 	if justPressed(c.actionToKey[playerMelee]) {
-		attack()
+		melee()
 	}
 
 	movePlayer(dir)

@@ -145,14 +145,14 @@ func (g *GObject) Update(dt float64) {
 	g.AppliedForce = Vector2{}
 	for _, child := range g.GetChildren() {
 		child.UpdateTimeAlive(dt)
-		if ObjectType(child) == Melee {
-			child.(*meleeObject).update(dt)
-		}
-		child.SetCenter(child.GetCenter().Sub(prevCenter).Add(g.Center))
 		if !child.IsAlive() {
 			g.RemoveChild(child)
 			continue
 		}
+		if ObjectType(child) == Melee {
+			child.(*meleeObject).update(dt)
+		}
+		child.SetCenter(child.GetCenter().Sub(prevCenter).Add(g.Center))
 	}
 }
 

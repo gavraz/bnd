@@ -217,7 +217,7 @@ func (m *Manager) Update(dt float64) {
 	}
 }
 
-func (m *Manager) MovePlayer(dir MoveDirection) {
+func (m *Manager) MovePlayer(dir Direction) {
 	playerObj := m.dynamicObjects["current-player"]
 	curSpeed := playerObj.GetBaseSpeed()
 	playerObj.AddForce(dir.v.MulScalar(curSpeed))
@@ -249,7 +249,7 @@ func (m *Manager) Fart(dt float64) {
 	m.pushAwayObjects(m.dynamicObjects["current-player"], 0.3, dt)
 }
 
-func (m *Manager) MeleeAttack() {
+func (m *Manager) Melee() {
 	lifeTime := 0.15
 	radius := 0.1
 	size := 0.01
