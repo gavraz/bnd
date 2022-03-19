@@ -8,7 +8,7 @@ const (
 	Player ObjType = iota
 	Crate
 	Wall
-	MeleeObject
+	Melee
 	Fart
 )
 
@@ -21,11 +21,11 @@ func ObjectType(object Object) ObjType {
 	case *wall:
 		return Wall
 	case *meleeObject:
-		return MeleeObject
+		return Melee
 	case *fart:
 		return Fart
 	default:
-		fmt.Printf("%T", object)
+		fmt.Printf("could not infer game object type, received: %T", object)
 		panic("unknown object type ")
 	}
 }

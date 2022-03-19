@@ -159,9 +159,8 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Color = colornames.Orange
 		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
 		imd.Ellipse(pixel.Vec{X: playerSize.X / 2, Y: playerSize.Y / 2}, 0)
-
 		imd.Draw(h.win)
-	case game.MeleeObject:
+	case game.Melee:
 		meleeCenter := h.toGlobalSpace(obj.GetCenter())
 		meleeSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)

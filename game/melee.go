@@ -10,7 +10,7 @@ type meleeObject struct {
 	radius   float64
 }
 
-func NewMeleeObject(obj DynamicObject, userDir Vector2, userCenter Vector2, userSize float64, angle float64, lifeTime float64, size float64, radius float64) *meleeObject {
+func newMeleeObject(obj DynamicObject, userDir Vector2, userCenter Vector2, userSize float64, angle float64, lifeTime float64, size float64, radius float64) *meleeObject {
 	dir := userDir.Rotate(angle)
 	obj.SetDirection(dir)
 	centerMain := userCenter.Add(dir.MulScalar(userSize))
@@ -33,7 +33,7 @@ func NewMeleeObject(obj DynamicObject, userDir Vector2, userCenter Vector2, user
 	return &meleeObject{obj, angle, angle, lifeTime, radius}
 }
 
-func (m *meleeObject) UpdateMelee(dt float64) {
+func (m *meleeObject) update(dt float64) {
 	m.curAngle -= 2 * m.angle * dt / m.lifeTime
 	parent := m.GetParent()
 	center := parent.GetCenter().Add(m.GetDirection().MulScalar(parent.GetWidth()))

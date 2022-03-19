@@ -31,19 +31,9 @@ func (m *Manager) AddStaticObject(name string, object StaticObject) {
 }
 
 func (m *Manager) ForEachGameObject(do func(object Object)) {
-	var LoopChildren func(parent DynamicObject)
-	LoopChildren = func(parent DynamicObject) {
-		children := parent.GetChildren()
-		if children != nil {
-			for _, child := range children {
-				do(child)
-				LoopChildren(child)
-			}
-		}
-	}
 	for _, obj := range m.dynamicObjects {
 		do(obj)
-		LoopChildren(obj)
+		obj.ForEachChild(do)
 	}
 	for _, obj := range m.staticObjects {
 		do(obj)
@@ -206,7 +196,6 @@ func (m *Manager) Update(dt float64) {
 			continue
 		}
 		obj.ApplyFriction(playerVelocityDecay, dt)
-		obj.MoveObject(dt)
 		obj.Update(dt)
 
 		if collider := m.resolveDynamicCollisions(obj); collider != nil {
@@ -215,6 +204,16 @@ func (m *Manager) Update(dt float64) {
 		if collider := m.resolveStaticCollisions(obj); collider != nil {
 			fmt.Println("Static Collision detected: ", obj.GetCenter(), collider.GetCenter())
 		}
+		// Might need to move it into a whole outside function that deals with such object types in the future
+		do := func(child Object) {
+			if ObjectType(child) != Melee {
+				return
+			}
+			if collider := m.resolveDynamicCollisions(child.(DynamicObject)); collider != nil && collider != child.(DynamicObject).GetParent() && ObjectType(collider) != Melee {
+				collider.(DynamicObject).GetHit()
+			}
+		}
+		obj.ForEachChild(do)
 	}
 }
 
@@ -250,12 +249,12 @@ func (m *Manager) Fart(dt float64) {
 	m.pushAwayObjects(m.dynamicObjects["current-player"], 0.3, dt)
 }
 
-func (m *Manager) Attack() {
+func (m *Manager) MeleeAttack() {
 	lifeTime := 0.15
 	radius := 0.1
 	size := 0.01
 	user := m.dynamicObjects["current-player"]
-	sword := NewMeleeObject(&GObject{
+	sword := newMeleeObject(&GObject{
 		CollisionType: Circle,
 		Width:         size,
 		Height:        size,
