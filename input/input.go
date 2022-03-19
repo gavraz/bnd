@@ -14,7 +14,51 @@ const (
 	KeyEsc
 	KeyEnter
 	KeySpace
-	KeyLeftShift
+	KeyLeft
+	KeyRight
+	KeyUp
+	KeyDown
+	KeyQ
+	KeyE
+	KeyR
+	KeyT
+	KeyY
+	KeyU
+	KeyI
+	KeyO
+	KeyP
+	KeyF
+	KeyG
+	KeyH
+	KeyJ
+	KeyK
+	KeyL
+	KeyZ
+	KeyX
+	KeyC
+	KeyV
+	KeyB
+	KeyN
+	KeyM
+	KeyLShift
+	KeyRShift
+	KeyLControl
+	KeyRControl
+	KeyLAlt
+	KeyRAlt
+	KeyBackspace
+	KeyTab
+	KeyCapsLock
+	Key0
+	Key1
+	Key2
+	Key3
+	Key4
+	Key5
+	Key6
+	Key7
+	Key8
+	Key9
 )
 
 type action int
@@ -25,7 +69,7 @@ const (
 	playerLeft
 	playerRight
 	playerAbility
-	playerAttack
+	playerMelee
 	menuUp
 	menuDown
 	menuBack
@@ -57,7 +101,7 @@ func (c *Controller) setDefault() {
 	c.actionToKey[menuEnter] = KeyEnter
 	c.actionToKey[pauseGame] = KeyEsc
 	c.actionToKey[playerAbility] = KeySpace
-	c.actionToKey[playerAttack] = KeyLeftShift
+	c.actionToKey[playerMelee] = KeyLShift
 }
 
 type movePlayerFunc func(direction game.MoveDirection)
@@ -83,7 +127,7 @@ func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed f
 	if justPressed(c.actionToKey[playerAbility]) {
 		fart(dt)
 	}
-	if justPressed(c.actionToKey[playerAttack]) {
+	if justPressed(c.actionToKey[playerMelee]) {
 		attack()
 	}
 
