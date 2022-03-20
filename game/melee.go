@@ -15,10 +15,10 @@ func newMeleeObject(obj DynamicObject, userDir Vector2, userCenter Vector2, user
 	obj.SetDirection(dir)
 	centerMain := userCenter.Add(dir.MulScalar(userSize))
 	obj.SetCenter(centerMain)
-	childNumber := int(100 * radius)
-	for i := 1; i <= childNumber; i++ {
+	childNumber := 100 * radius
+	for i := 1.0; i <= childNumber; i++ {
 		sword := &meleeObject{&GObject{
-			Center:        centerMain.Add(dir.MulScalar(float64(i) * radius / float64(childNumber))),
+			Center:        centerMain.Add(dir.MulScalar(i * radius / childNumber)),
 			CollisionType: Circle,
 			Width:         size,
 			Height:        size,
