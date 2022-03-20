@@ -69,6 +69,7 @@ const (
 	playerLeft
 	playerRight
 	playerAbility
+	playerMelee
 	menuUp
 	menuDown
 	menuBack
@@ -100,11 +101,12 @@ func (c *Controller) setDefault() {
 	c.actionToKey[menuEnter] = KeyEnter
 	c.actionToKey[pauseGame] = KeyEsc
 	c.actionToKey[playerAbility] = KeySpace
+	c.actionToKey[playerMelee] = KeyLShift
 }
 
 type movePlayerFunc func(direction game.Direction)
 
-func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, fart func(dt float64), dt float64) {
+func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, fart func(dt float64), melee func(), dt float64) {
 	var dir game.Direction
 
 	if isPressed(c.actionToKey[playerUp]) {
@@ -124,6 +126,9 @@ func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed f
 	}
 	if justPressed(c.actionToKey[playerAbility]) {
 		fart(dt)
+	}
+	if justPressed(c.actionToKey[playerMelee]) {
+		melee()
 	}
 
 	movePlayer(dir)

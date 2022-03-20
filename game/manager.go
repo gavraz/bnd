@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -32,11 +33,7 @@ func (m *Manager) AddStaticObject(name string, object StaticObject) {
 func (m *Manager) ForEachGameObject(do func(object Object)) {
 	for _, obj := range m.dynamicObjects {
 		do(obj)
-		if obj.GetChildren() != nil {
-			for _, child := range obj.GetChildren() {
-				do(child)
-			}
-		}
+		obj.ForEachChild(do)
 	}
 	for _, obj := range m.staticObjects {
 		do(obj)
@@ -105,11 +102,12 @@ func (m *Manager) InitGame() {
 			X: 0,
 			Y: 0,
 		},
-		BaseSpeed:     5,
+		BaseSpeed:     2,
 		CollisionType: Circle,
 		Width:         0.05,
 		Height:        0.05,
 		Mass:          1,
+		Direction:     Vector2{0, 1},
 	}, 100))
 	m.AddStaticObject("enemy-player", NewPlayer(&GObject{
 		Center: Vector2{
@@ -206,6 +204,16 @@ func (m *Manager) Update(dt float64) {
 		if collider := m.resolveStaticCollisions(obj); collider != nil {
 			fmt.Println("Static Collision detected: ", obj.GetCenter(), collider.GetCenter())
 		}
+		// Might need to move it into a whole outside function that deals with such object types in the future
+		do := func(child Object) {
+			if ObjectType(child) != Melee {
+				return
+			}
+			if collider := m.resolveDynamicCollisions(child.(DynamicObject)); collider != nil && collider != child.(DynamicObject).GetParent() && ObjectType(collider) != Melee {
+				collider.(DynamicObject).GetHit()
+			}
+		}
+		obj.ForEachChild(do)
 	}
 }
 
@@ -239,6 +247,23 @@ func (m *Manager) Fart(dt float64) {
 	}
 	m.dynamicObjects["current-player"].AddChild(fart)
 	m.pushAwayObjects(m.dynamicObjects["current-player"], 0.3, dt)
+}
+
+func (m *Manager) Melee() {
+	lifeTime := 0.15
+	radius := 0.1
+	size := 0.01
+	user := m.dynamicObjects["current-player"]
+	sword := newMeleeObject(&GObject{
+		CollisionType: Circle,
+		Width:         size,
+		Height:        size,
+		Mass:          1,
+		ParentObject:  user,
+		Until:         time.Now().Add(time.Duration(lifeTime*1000) * time.Millisecond),
+		IsPassthrough: true,
+	}, user.GetDirection(), user.GetCenter(), user.GetWidth(), math.Pi/4, lifeTime, size, radius)
+	m.dynamicObjects["current-player"].AddChild(sword)
 }
 
 func (m *Manager) pushAwayObjects(pusherObject DynamicObject, dist float64, dt float64) {
