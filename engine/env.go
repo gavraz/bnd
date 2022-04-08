@@ -34,6 +34,7 @@ func (e *Environment) ForEachGameObject(do func(object Object)) {
 
 func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObject {
 	var isChild bool
+	colliders := make([]DynamicObject, 0)
 	for _, other := range e.dynamicObjects {
 		isChild = false
 		if other == obj {
@@ -58,7 +59,7 @@ func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObject 
 			continue
 		}
 		if collider := CheckDynamicCollision(obj, other); collider != nil {
-			return collider
+			colliders = append(colliders, collider)
 		}
 	}
 	return nil

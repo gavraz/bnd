@@ -21,7 +21,7 @@ func (m *Manager) HP() int {
 }
 
 func (m *Manager) InitGame() {
-	m.env.AddDynamicObject("current-player", NewPlayer(&engine.GObject{
+	m.env.AddDynamicObject("current-player", NewPlayer(&engine.GameObject{
 		Center: engine.Vector2{
 			X: 0,
 			Y: 0,
@@ -34,7 +34,7 @@ func (m *Manager) InitGame() {
 		Direction:     engine.Vector2{Y: 1},
 		Friction:      4.0,
 	}, 100))
-	m.env.AddStaticObject("enemy-player", NewPlayer(&engine.GObject{
+	m.env.AddStaticObject("enemy-player", NewPlayer(&engine.GameObject{
 		Center: engine.Vector2{
 			X: 0.2,
 			Y: 0.3,
@@ -46,7 +46,7 @@ func (m *Manager) InitGame() {
 		Friction:      4.0,
 	}, 100))
 	m.env.AddDynamicObject("crate", &crate{
-		DynamicObject: &engine.GObject{
+		DynamicObject: &engine.GameObject{
 			Center: engine.Vector2{
 				X: -0.2,
 				Y: -0.2,
@@ -59,7 +59,7 @@ func (m *Manager) InitGame() {
 		},
 	})
 	m.env.AddDynamicObject("crate2", &crate{
-		DynamicObject: &engine.GObject{
+		DynamicObject: &engine.GameObject{
 			Center: engine.Vector2{
 				X: -0.6,
 				Y: -0.5,
@@ -72,7 +72,7 @@ func (m *Manager) InitGame() {
 		},
 	})
 	m.env.AddStaticObject("wall-bottom", &wall{
-		StaticObject: &engine.GObject{
+		StaticObject: &engine.GameObject{
 			Center: engine.Vector2{
 				X: 0,
 				Y: -0.83,
@@ -83,7 +83,7 @@ func (m *Manager) InitGame() {
 		},
 	})
 	m.env.AddStaticObject("wall-left", &wall{
-		StaticObject: &engine.GObject{
+		StaticObject: &engine.GameObject{
 			Center: engine.Vector2{
 				X: -0.98,
 				Y: 0,
@@ -94,7 +94,7 @@ func (m *Manager) InitGame() {
 		},
 	})
 	m.env.AddStaticObject("wall-right", &wall{
-		StaticObject: &engine.GObject{
+		StaticObject: &engine.GameObject{
 			Center: engine.Vector2{
 				X: 0.98,
 				Y: 0,
@@ -105,7 +105,7 @@ func (m *Manager) InitGame() {
 		},
 	})
 	m.env.AddStaticObject("wall-top", &wall{
-		StaticObject: &engine.GObject{
+		StaticObject: &engine.GameObject{
 			Center: engine.Vector2{
 				X: 0,
 				Y: 0.98,
@@ -137,7 +137,7 @@ func (m *Manager) clearGameData() {
 func (m *Manager) Fart(dt float64) {
 	player := m.env.ObjectByName("current-player").(*player)
 	fart := &fart{
-		DynamicObject: &engine.GObject{
+		DynamicObject: &engine.GameObject{
 			CollisionType: engine.Circle,
 			ParentObject:  player,
 			Center:        player.GetCenter(),
@@ -156,7 +156,7 @@ func (m *Manager) Melee() {
 	radius := 0.1
 	size := 0.01
 	user := m.env.ObjectByName("current-player").(*player)
-	sword := newMeleeObject(&engine.GObject{
+	sword := newMeleeObject(&engine.GameObject{
 		CollisionType: engine.Circle,
 		Width:         size,
 		Height:        size,
