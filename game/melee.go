@@ -36,7 +36,7 @@ func newMeleeObject(obj engine.DynamicObject, userDir engine.Vector2, userCenter
 	return &meleeObject{obj, angle, angle, lifeTime, radius}
 }
 
-func (m *meleeObject) update(dt float64) {
+func (m *meleeObject) Update(dt float64) {
 	m.curAngle -= 2 * m.angle * dt / m.lifeTime
 	parent := m.GetParent()
 	center := parent.GetCenter().Add(m.GetDirection().MulScalar(parent.GetWidth()))

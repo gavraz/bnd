@@ -109,6 +109,8 @@ func (e *Environment) Update(dt float64) {
 		if collider := e.ResolveStaticCollisions(obj); collider != nil {
 			fmt.Println("Static Collision detected: ", obj.GetCenter(), collider.GetCenter())
 		}
+
+		// TODO: melee collision
 		//Might need to move it into a whole outside function that deals with such object types in the future
 		//do := func(child Object) {
 		//	if ObjectType(child) != Melee {

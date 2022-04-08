@@ -1,20 +1,8 @@
 package engine
 
 import (
-	v "bnd/vector"
 	"fmt"
 	"time"
-)
-
-type Ability int
-
-const (
-	None Ability = iota
-	Fire
-	Speed
-	Bomb
-	Oil
-	Shield
 )
 
 type CollisionTypes int
@@ -23,8 +11,6 @@ const (
 	Rectangle CollisionTypes = iota
 	Circle
 )
-
-type Vector2 = v.Vector2
 
 type Object interface {
 	GetCollisionType() CollisionTypes
@@ -134,6 +120,10 @@ func (g *GObject) ForEachChild(do func(child Object)) {
 	}
 }
 
+type Updater interface {
+	Update(dt float64)
+}
+
 func (g *GObject) Update(dt float64) {
 	g.Acceleration = g.AppliedForce.DivScalar(g.Mass)
 	g.Velocity = g.Velocity.Add(g.Acceleration.MulScalar(dt))
@@ -149,9 +139,11 @@ func (g *GObject) Update(dt float64) {
 			g.RemoveChild(child)
 			continue
 		}
-		//if ObjectType(child) == Melee {
-		//	child.(*meleeObject).update(dt)
-		//}
+
+		if u, ok := child.(Updater); ok {
+			u.Update(dt)
+		}
+
 		child.SetCenter(child.GetCenter().Sub(prevCenter).Add(g.Center))
 	}
 }
