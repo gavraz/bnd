@@ -1,188 +1,116 @@
 package game
 
 import (
-	"fmt"
+	"bnd/engine"
 	"math"
 	"time"
 )
 
-const (
-	playerVelocityDecay = 4.0
-)
-
 type Manager struct {
-	dynamicObjects map[string]DynamicObject
-	staticObjects  map[string]StaticObject
+	env *engine.Environment
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		dynamicObjects: make(map[string]DynamicObject),
-		staticObjects:  make(map[string]StaticObject),
-	}
-}
-
-func (m *Manager) AddDynamicObject(name string, object DynamicObject) {
-	m.dynamicObjects[name] = object
-}
-
-func (m *Manager) AddStaticObject(name string, object StaticObject) {
-	m.staticObjects[name] = object
-}
-
-func (m *Manager) ForEachGameObject(do func(object Object)) {
-	for _, obj := range m.dynamicObjects {
-		do(obj)
-		obj.ForEachChild(do)
-	}
-	for _, obj := range m.staticObjects {
-		do(obj)
+		env: engine.NewEnvironment(),
 	}
 }
 
 func (m *Manager) HP() int {
-	return m.dynamicObjects["current-player"].(*player).hp
-}
-
-func (m *Manager) resolveDynamicCollisions(obj DynamicObject) Object {
-	var isChild bool
-	for _, other := range m.dynamicObjects {
-		isChild = false
-		if other == obj {
-			continue
-		}
-		for _, child := range obj.GetChildren() {
-			if Object(other) == child {
-				isChild = true
-				break
-			}
-		}
-		if isChild {
-			continue
-		}
-		for _, child := range other.GetChildren() {
-			if Object(obj) == child {
-				isChild = true
-				break
-			}
-		}
-		if isChild {
-			continue
-		}
-		if collider := CheckDynamicCollision(obj, other); collider != nil {
-			return collider
-		}
-	}
-	return nil
-}
-
-func (m *Manager) resolveStaticCollisions(obj DynamicObject) Object {
-	var isChild bool
-	for _, other := range m.staticObjects {
-		isChild = false
-		for _, child := range obj.GetChildren() {
-			if Object(other) == child {
-				isChild = true
-				break
-			}
-		}
-		if isChild {
-			continue
-		}
-		if collider := CheckStaticCollision(obj, other); collider != nil {
-			return collider
-		}
-	}
-	return nil
+	return m.env.ObjectByName("current-player").(*player).hp
 }
 
 func (m *Manager) InitGame() {
-	m.AddDynamicObject("current-player", NewPlayer(&GObject{
-		Center: Vector2{
+	m.env.AddDynamicObject("current-player", NewPlayer(&engine.GObject{
+		Center: engine.Vector2{
 			X: 0,
 			Y: 0,
 		},
 		BaseSpeed:     2,
-		CollisionType: Circle,
+		CollisionType: engine.Circle,
 		Width:         0.05,
 		Height:        0.05,
 		Mass:          1,
-		Direction:     Vector2{0, 1},
+		Direction:     engine.Vector2{Y: 1},
+		Friction:      4.0,
 	}, 100))
-	m.AddStaticObject("enemy-player", NewPlayer(&GObject{
-		Center: Vector2{
+	m.env.AddStaticObject("enemy-player", NewPlayer(&engine.GObject{
+		Center: engine.Vector2{
 			X: 0.2,
 			Y: 0.3,
 		},
 		BaseSpeed:     1,
-		CollisionType: Circle,
+		CollisionType: engine.Circle,
 		Width:         0.2,
 		Height:        0.2,
+		Friction:      4.0,
 	}, 100))
-	m.AddDynamicObject("crate", &crate{
-		DynamicObject: &GObject{
-			Center: Vector2{
+	m.env.AddDynamicObject("crate", &crate{
+		DynamicObject: &engine.GObject{
+			Center: engine.Vector2{
 				X: -0.2,
 				Y: -0.2,
 			},
-			CollisionType: Rectangle,
+			CollisionType: engine.Rectangle,
 			Width:         0.1,
 			Height:        0.1,
 			Mass:          1,
+			Friction:      4.0,
 		},
 	})
-	m.AddDynamicObject("crate2", &crate{
-		DynamicObject: &GObject{
-			Center: Vector2{
+	m.env.AddDynamicObject("crate2", &crate{
+		DynamicObject: &engine.GObject{
+			Center: engine.Vector2{
 				X: -0.6,
 				Y: -0.5,
 			},
-			CollisionType: Rectangle,
+			CollisionType: engine.Rectangle,
 			Width:         0.2,
 			Height:        0.2,
 			Mass:          2,
+			Friction:      4.0,
 		},
 	})
-	m.AddStaticObject("wall-bottom", &wall{
-		StaticObject: &GObject{
-			Center: Vector2{
+	m.env.AddStaticObject("wall-bottom", &wall{
+		StaticObject: &engine.GObject{
+			Center: engine.Vector2{
 				X: 0,
 				Y: -0.83,
 			},
-			CollisionType: Rectangle,
+			CollisionType: engine.Rectangle,
 			Width:         1.92,
 			Height:        0.34,
 		},
 	})
-	m.AddStaticObject("wall-left", &wall{
-		StaticObject: &GObject{
-			Center: Vector2{
+	m.env.AddStaticObject("wall-left", &wall{
+		StaticObject: &engine.GObject{
+			Center: engine.Vector2{
 				X: -0.98,
 				Y: 0,
 			},
-			CollisionType: Rectangle,
+			CollisionType: engine.Rectangle,
 			Width:         0.04,
 			Height:        2,
 		},
 	})
-	m.AddStaticObject("wall-right", &wall{
-		StaticObject: &GObject{
-			Center: Vector2{
+	m.env.AddStaticObject("wall-right", &wall{
+		StaticObject: &engine.GObject{
+			Center: engine.Vector2{
 				X: 0.98,
 				Y: 0,
 			},
-			CollisionType: Rectangle,
+			CollisionType: engine.Rectangle,
 			Width:         0.04,
 			Height:        2,
 		},
 	})
-	m.AddStaticObject("wall-top", &wall{
-		StaticObject: &GObject{
-			Center: Vector2{
+	m.env.AddStaticObject("wall-top", &wall{
+		StaticObject: &engine.GObject{
+			Center: engine.Vector2{
 				X: 0,
 				Y: 0.98,
 			},
-			CollisionType: Rectangle,
+			CollisionType: engine.Rectangle,
 			Width:         1.92,
 			Height:        0.04,
 		},
@@ -190,35 +118,9 @@ func (m *Manager) InitGame() {
 
 }
 
-func (m *Manager) Update(dt float64) {
-	for _, obj := range m.dynamicObjects {
-		if obj.GetParent() != nil {
-			continue
-		}
-		obj.ApplyFriction(playerVelocityDecay, dt)
-		obj.Update(dt)
-
-		if collider := m.resolveDynamicCollisions(obj); collider != nil {
-			fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
-		}
-		if collider := m.resolveStaticCollisions(obj); collider != nil {
-			fmt.Println("Static Collision detected: ", obj.GetCenter(), collider.GetCenter())
-		}
-		// Might need to move it into a whole outside function that deals with such object types in the future
-		do := func(child Object) {
-			if ObjectType(child) != Melee {
-				return
-			}
-			if collider := m.resolveDynamicCollisions(child.(DynamicObject)); collider != nil && collider != child.(DynamicObject).GetParent() && ObjectType(collider) != Melee {
-				collider.(DynamicObject).GetHit()
-			}
-		}
-		obj.ForEachChild(do)
-	}
-}
-
 func (m *Manager) MovePlayer(dir Direction) {
-	playerObj := m.dynamicObjects["current-player"]
+	m.env.ObjectByName("current-player")
+	playerObj := m.env.ObjectByName("current-player").(*player)
 	curSpeed := playerObj.GetBaseSpeed()
 	playerObj.AddForce(dir.v.MulScalar(curSpeed))
 }
@@ -229,33 +131,33 @@ func (m *Manager) ResetGame() {
 }
 
 func (m *Manager) clearGameData() {
-	m.dynamicObjects = make(map[string]DynamicObject)
-	m.staticObjects = make(map[string]StaticObject)
+	m.env.ClearGameData()
 }
 
 func (m *Manager) Fart(dt float64) {
+	player := m.env.ObjectByName("current-player").(*player)
 	fart := &fart{
-		DynamicObject: &GObject{
-			CollisionType: Circle,
-			ParentObject:  m.dynamicObjects["current-player"],
-			Center:        m.dynamicObjects["current-player"].GetCenter(),
+		DynamicObject: &engine.GObject{
+			CollisionType: engine.Circle,
+			ParentObject:  player,
+			Center:        player.GetCenter(),
 			Width:         0.5,
 			Height:        0.5,
 			IsPassthrough: true,
 			Until:         time.Now().Add(100 * time.Millisecond),
 		},
 	}
-	m.dynamicObjects["current-player"].AddChild(fart)
-	m.pushAwayObjects(m.dynamicObjects["current-player"], 0.3, dt)
+	player.AddChild(fart)
+	m.pushAwayObjects(fart, dt)
 }
 
 func (m *Manager) Melee() {
 	lifeTime := 0.15
 	radius := 0.1
 	size := 0.01
-	user := m.dynamicObjects["current-player"]
-	sword := newMeleeObject(&GObject{
-		CollisionType: Circle,
+	user := m.env.ObjectByName("current-player").(*player)
+	sword := newMeleeObject(&engine.GObject{
+		CollisionType: engine.Circle,
 		Width:         size,
 		Height:        size,
 		Mass:          1,
@@ -263,19 +165,20 @@ func (m *Manager) Melee() {
 		Until:         time.Now().Add(time.Duration(lifeTime*1000) * time.Millisecond),
 		IsPassthrough: true,
 	}, user.GetDirection(), user.GetCenter(), user.GetWidth(), math.Pi/4, lifeTime, size, radius)
-	m.dynamicObjects["current-player"].AddChild(sword)
+	user.AddChild(sword)
 }
 
-func (m *Manager) pushAwayObjects(pusherObject DynamicObject, dist float64, dt float64) {
-	for _, obj := range m.dynamicObjects {
-		if pusherObject == obj {
-			continue
-		}
-		if obj.GetCenter().Distance(pusherObject.GetCenter()) > dist {
-			continue
-		}
-		pushVector := obj.GetCenter().Sub(pusherObject.GetCenter()).Normalize().DivScalar(dt)
-		obj.AddForce(pushVector)
+func (m *Manager) pushAwayObjects(pusherObject engine.DynamicObject, dt float64) {
+	if collider := m.env.ResolveDynamicCollisions(pusherObject); collider != nil {
+		pushVector := collider.GetCenter().Sub(pusherObject.GetCenter()).Normalize().DivScalar(dt)
+		collider.AddForce(pushVector)
 	}
+}
 
+func (m *Manager) Update(dt float64) {
+	m.env.Update(dt)
+}
+
+func (m *Manager) ForEachGameObject(do func(object engine.Object)) {
+	m.env.ForEachGameObject(do)
 }

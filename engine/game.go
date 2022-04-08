@@ -1,7 +1,6 @@
-package game
+package engine
 
 import (
-	//v "bnd/vector_pointers"
 	v "bnd/vector"
 	"fmt"
 	"time"
@@ -50,7 +49,7 @@ type DynamicObject interface {
 	GetBaseSpeed() float64
 	SetBaseSpeed(s float64)
 	GetMass() float64
-	ApplyFriction(friction, dt float64)
+	ApplyFriction(dt float64)
 	SetDirection(dir Vector2)
 	GetDirection() Vector2
 	GetAppliedForce() Vector2
@@ -85,6 +84,7 @@ type GObject struct {
 	BaseSpeed     float64
 	Mass          float64
 	IsPassthrough bool
+	Friction      float64
 }
 
 func (g *GObject) GetIsPassthrough() bool {
@@ -149,9 +149,9 @@ func (g *GObject) Update(dt float64) {
 			g.RemoveChild(child)
 			continue
 		}
-		if ObjectType(child) == Melee {
-			child.(*meleeObject).update(dt)
-		}
+		//if ObjectType(child) == Melee {
+		//	child.(*meleeObject).update(dt)
+		//}
 		child.SetCenter(child.GetCenter().Sub(prevCenter).Add(g.Center))
 	}
 }
@@ -180,8 +180,8 @@ func (g *GObject) GetMass() float64 {
 	return g.Mass
 }
 
-func (g *GObject) ApplyFriction(friction, dt float64) {
-	g.Velocity = g.Velocity.MulScalar(1 - friction*dt)
+func (g *GObject) ApplyFriction(dt float64) {
+	g.Velocity = g.Velocity.MulScalar(1 - g.Friction*dt)
 }
 
 func (g *GObject) GetChildren() []DynamicObject {

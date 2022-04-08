@@ -1,7 +1,9 @@
 package game
 
+import "bnd/engine"
+
 type Direction struct {
-	v Vector2
+	v engine.Vector2
 }
 
 func (d *Direction) Up() {

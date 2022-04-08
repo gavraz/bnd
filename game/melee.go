@@ -1,25 +1,28 @@
 package game
 
-import "time"
+import (
+	"bnd/engine"
+	"time"
+)
 
 type meleeObject struct {
-	DynamicObject
+	engine.DynamicObject
 	angle    float64
 	curAngle float64
 	lifeTime float64
 	radius   float64
 }
 
-func newMeleeObject(obj DynamicObject, userDir Vector2, userCenter Vector2, userSize float64, angle float64, lifeTime float64, size float64, radius float64) *meleeObject {
+func newMeleeObject(obj engine.DynamicObject, userDir engine.Vector2, userCenter engine.Vector2, userSize float64, angle float64, lifeTime float64, size float64, radius float64) *meleeObject {
 	dir := userDir.Rotate(angle)
 	obj.SetDirection(dir)
 	centerMain := userCenter.Add(dir.MulScalar(userSize))
 	obj.SetCenter(centerMain)
 	childNumber := 100 * radius
 	for i := 1.0; i <= childNumber; i++ {
-		sword := &meleeObject{&GObject{
+		sword := &meleeObject{&engine.GObject{
 			Center:        centerMain.Add(dir.MulScalar(i * radius / childNumber)),
-			CollisionType: Circle,
+			CollisionType: engine.Circle,
 			Width:         size,
 			Height:        size,
 			Mass:          1,

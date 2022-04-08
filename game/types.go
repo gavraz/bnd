@@ -1,6 +1,9 @@
 package game
 
-import "fmt"
+import (
+	"bnd/engine"
+	"fmt"
+)
 
 type ObjType int
 
@@ -12,7 +15,7 @@ const (
 	Fart
 )
 
-func ObjectType(object Object) ObjType {
+func ObjectType(object engine.Object) ObjType {
 	switch object.(type) {
 	case *player:
 		return Player

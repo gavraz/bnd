@@ -1,6 +1,7 @@
 package pixel
 
 import (
+	"bnd/engine"
 	"bnd/game"
 	"bnd/input"
 	"fmt"
@@ -23,7 +24,7 @@ type choicer interface {
 }
 
 type Environmenter interface {
-	ForEachGameObject(do func(object game.Object))
+	ForEachGameObject(do func(object engine.Object))
 	HP() int
 }
 
@@ -92,7 +93,7 @@ func (h *Handler) DrawPauseMenu(c choicer) {
 
 func (h *Handler) drawMenuText(c choicer, fontface font.Face, highlighted color.Color, normal color.Color) {
 	atlas := text.NewAtlas(fontface, text.ASCII)
-	var v game.Vector2
+	var v engine.Vector2
 	v = h.toGlobalSpace(v)
 	txt := text.New(pixel.V(v.X, v.Y), atlas)
 	current := c.CurrentChoice()
@@ -134,27 +135,27 @@ func (h *Handler) aspectRatio() float64 {
 	return h.w() / h.h()
 }
 
-func (h *Handler) toLocalSpace(v game.Vector2) game.Vector2 {
+func (h *Handler) toLocalSpace(v engine.Vector2) engine.Vector2 {
 	aspectRatio := h.aspectRatio()
-	return game.Vector2{X: v.X/h.w()*2 - 1*aspectRatio, Y: v.Y/h.h()*2 - 1}
+	return engine.Vector2{X: v.X/h.w()*2 - 1*aspectRatio, Y: v.Y/h.h()*2 - 1}
 }
 
 // Converts a point from local space to global space (i.e. screen space)
-func (h *Handler) toGlobalSpace(v game.Vector2) game.Vector2 {
+func (h *Handler) toGlobalSpace(v engine.Vector2) engine.Vector2 {
 	aspectRatio := h.aspectRatio()
-	return game.Vector2{X: (v.X + aspectRatio) * h.w() / 2 / aspectRatio, Y: (v.Y + 1) * h.h() / 2}
+	return engine.Vector2{X: (v.X + aspectRatio) * h.w() / 2 / aspectRatio, Y: (v.Y + 1) * h.h() / 2}
 }
 
-func (h *Handler) toGlobalUnits(v game.Vector2) game.Vector2 {
+func (h *Handler) toGlobalUnits(v engine.Vector2) engine.Vector2 {
 	aspectRatio := h.aspectRatio()
-	return game.Vector2{X: v.X * h.w() / 2 / aspectRatio, Y: v.Y * h.h() / 2}
+	return engine.Vector2{X: v.X * h.w() / 2 / aspectRatio, Y: v.Y * h.h() / 2}
 }
 
-func (h *Handler) drawGameObject(obj game.Object) {
+func (h *Handler) drawGameObject(obj engine.Object) {
 	switch game.ObjectType(obj) {
 	case game.Player:
 		playerCenter := h.toGlobalSpace(obj.GetCenter())
-		playerSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		playerSize := h.toGlobalUnits(engine.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Orange
 		imd.Push(pixel.V(playerCenter.X, playerCenter.Y))
@@ -162,7 +163,7 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Draw(h.win)
 	case game.Melee:
 		meleeCenter := h.toGlobalSpace(obj.GetCenter())
-		meleeSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		meleeSize := h.toGlobalUnits(engine.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Darkgrey
 		imd.Push(pixel.V(meleeCenter.X, meleeCenter.Y))
@@ -170,7 +171,7 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Draw(h.win)
 	case game.Crate:
 		crateCenter := h.toGlobalSpace(obj.GetCenter())
-		crateSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		crateSize := h.toGlobalUnits(engine.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Cyan
 		imd.Push(pixel.V(crateCenter.X-crateSize.X/2, crateCenter.Y-crateSize.Y/2))
@@ -179,7 +180,7 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Draw(h.win)
 	case game.Wall:
 		wallCenter := h.toGlobalSpace(obj.GetCenter())
-		wallSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		wallSize := h.toGlobalUnits(engine.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = colornames.Darkblue
 		imd.Push(pixel.V(wallCenter.X-wallSize.X/2, wallCenter.Y-wallSize.Y/2))
@@ -188,7 +189,7 @@ func (h *Handler) drawGameObject(obj game.Object) {
 		imd.Draw(h.win)
 	case game.Fart:
 		fartCenter := h.toGlobalSpace(obj.GetCenter())
-		fartSize := h.toGlobalUnits(game.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
+		fartSize := h.toGlobalUnits(engine.Vector2{X: obj.GetWidth(), Y: obj.GetHeight()})
 		imd := imdraw.New(nil)
 		imd.Color = color.RGBA{
 			R: 0,
