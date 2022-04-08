@@ -1,8 +1,8 @@
-package game
+package engine
 
 import "math"
 
-func CheckDynamicCollision(obj, other DynamicObject) Object {
+func CheckDynamicCollision(obj, other DynamicObject) DynamicObject {
 	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
 		p1 := obj.GetCenter()
 		p2 := other.GetCenter()
@@ -116,7 +116,7 @@ func CheckDynamicCollision(obj, other DynamicObject) Object {
 	return nil
 }
 
-func CheckStaticCollision(obj DynamicObject, other StaticObject) Object {
+func CheckStaticCollision(obj DynamicObject, other StaticObject) StaticObject {
 	if obj.GetCollisionType() == Circle && other.GetCollisionType() == Circle {
 		p1 := obj.GetCenter()
 		p2 := other.GetCenter()
