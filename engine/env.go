@@ -32,7 +32,7 @@ func (e *Environment) ForEachGameObject(do func(object Object)) {
 	}
 }
 
-func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObject {
+func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) []DynamicObject {
 	var isChild bool
 	colliders := make([]DynamicObject, 0)
 	for _, other := range e.dynamicObjects {
@@ -62,11 +62,15 @@ func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObject 
 			colliders = append(colliders, collider)
 		}
 	}
+	if len(colliders) > 0 {
+		return colliders
+	}
 	return nil
 }
 
-func (e *Environment) ResolveStaticCollisions(obj DynamicObject) StaticObject {
+func (e *Environment) ResolveStaticCollisions(obj DynamicObject) []StaticObject {
 	var isChild bool
+	colliders := make([]StaticObject, 0)
 	for _, other := range e.staticObjects {
 		isChild = false
 		for _, child := range obj.GetChildren() {
@@ -79,8 +83,11 @@ func (e *Environment) ResolveStaticCollisions(obj DynamicObject) StaticObject {
 			continue
 		}
 		if collider := CheckStaticCollision(obj, other); collider != nil {
-			return collider
+			colliders = append(colliders, collider)
 		}
+	}
+	if len(colliders) > 0 {
+		return colliders
 	}
 	return nil
 }
@@ -104,11 +111,15 @@ func (e *Environment) Update(dt float64) {
 		obj.ApplyFriction(dt)
 		obj.Update(dt)
 
-		if collider := e.ResolveDynamicCollisions(obj); collider != nil {
-			fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
+		if colliders := e.ResolveDynamicCollisions(obj); colliders != nil {
+			for _, collider := range colliders {
+				fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
+			}
 		}
-		if collider := e.ResolveStaticCollisions(obj); collider != nil {
-			fmt.Println("Static Collision detected: ", obj.GetCenter(), collider.GetCenter())
+		if colliders := e.ResolveStaticCollisions(obj); colliders != nil {
+			for _, collider := range colliders {
+				fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
+			}
 		}
 
 		// TODO: melee collision

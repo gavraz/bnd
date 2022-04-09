@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -50,70 +49,87 @@ type DynamicObject interface {
 	RemoveParent()
 	RemoveChild(child DynamicObject)
 	IsAlive() bool
-	GetHit()
+	SetRootParent(g DynamicObject)
+	GetRootParent() DynamicObject
 }
 
-type GameObject struct {
+type GameObjectConf struct {
 	CollisionType CollisionTypes
-	ChildObjects  []DynamicObject
-	ParentObject  DynamicObject
-	AppliedForce  Vector2
 	Width         float64
 	Height        float64
 	Center        Vector2
 	Velocity      Vector2
 	Acceleration  Vector2
 	Direction     Vector2
-	TimeAlive     float64
-	Until         time.Time
-	HitCooldown   time.Time
 	BaseSpeed     float64
 	Mass          float64
 	IsPassthrough bool
 	Friction      float64
+	Until         time.Time
 }
 
-func (g *GameObject) GetIsPassthrough() bool {
+type gameObject struct {
+	childObjects []DynamicObject
+	parentObject DynamicObject
+	rootParent   DynamicObject
+	appliedForce Vector2
+	timeAlive    float64
+
+	GameObjectConf
+}
+
+func NewDynamicObject(conf GameObjectConf) DynamicObject {
+	obj := &gameObject{GameObjectConf: conf}
+	obj.rootParent = obj
+	return obj
+}
+
+func NewStaticObject(conf GameObjectConf) StaticObject {
+	obj := &gameObject{GameObjectConf: conf}
+	return obj
+}
+
+func (g *gameObject) GetIsPassthrough() bool {
 	return g.IsPassthrough
 }
 
-func (g *GameObject) GetCollisionType() CollisionTypes {
+func (g *gameObject) GetCollisionType() CollisionTypes {
 	return g.CollisionType
 }
 
-func (g *GameObject) GetCenter() Vector2 {
+func (g *gameObject) GetCenter() Vector2 {
 	return g.Center
 }
 
-func (g *GameObject) GetHeight() float64 {
+func (g *gameObject) GetHeight() float64 {
 	return g.Height
 }
 
-func (g *GameObject) GetWidth() float64 {
+func (g *gameObject) GetWidth() float64 {
 	return g.Width
 }
 
-func (g *GameObject) SetCenter(p Vector2) {
+func (g *gameObject) SetCenter(p Vector2) {
 	g.Center = p
 }
 
-func (g *GameObject) GetDirection() Vector2 {
+func (g *gameObject) GetDirection() Vector2 {
 	return g.Direction
 }
 
-func (g *GameObject) SetDirection(d Vector2) {
+func (g *gameObject) SetDirection(d Vector2) {
 	g.Direction = d.Normalize()
 }
 
-func (g *GameObject) GetVelocity() Vector2 {
+func (g *gameObject) GetVelocity() Vector2 {
 	return g.Velocity
 }
 
-func (g *GameObject) GetAcceleration() Vector2 {
+func (g *gameObject) GetAcceleration() Vector2 {
 	return g.Acceleration
 }
 
-func (g *GameObject) ForEachChild(do func(child Object)) {
+func (g *gameObject) ForEachChild(do func(child Object)) {
 	for _, child := range g.GetChildren() {
 		do(child)
 		child.ForEachChild(do)
@@ -124,15 +140,15 @@ type Updater interface {
 	Update(dt float64)
 }
 
-func (g *GameObject) Update(dt float64) {
-	g.Acceleration = g.AppliedForce.DivScalar(g.Mass)
-	g.Velocity = g.Velocity.Add(g.Acceleration.MulScalar(dt))
+func (g *gameObject) Update(dt float64) {
+	g.Acceleration = g.appliedForce.DivScalar(g.Mass)
 	prevCenter := g.Center
+	g.Velocity = g.Velocity.Add(g.Acceleration.MulScalar(dt))
 	g.Center = g.Center.Add(g.Velocity.MulScalar(dt))
 	if g.Velocity.Length() != 0 {
 		g.SetDirection(g.Velocity)
 	}
-	g.AppliedForce = Vector2{}
+	g.appliedForce = Vector2{}
 	for _, child := range g.GetChildren() {
 		child.UpdateTimeAlive(dt)
 		if !child.IsAlive() {
@@ -143,90 +159,93 @@ func (g *GameObject) Update(dt float64) {
 		if u, ok := child.(Updater); ok {
 			u.Update(dt)
 		}
-
-		child.SetCenter(child.GetCenter().Sub(prevCenter).Add(g.Center))
+		child.SetCenter(g.GetCenter().Add(child.GetCenter().Sub(prevCenter)))
 	}
 }
 
-func (g *GameObject) UpdateTimeAlive(dt float64) {
-	g.TimeAlive += dt
+func (g *gameObject) UpdateTimeAlive(dt float64) {
+	g.timeAlive += dt
 }
 
-func (g *GameObject) SetVelocity(a Vector2) {
+func (g *gameObject) SetVelocity(a Vector2) {
 	g.Velocity = a
 }
 
-func (g *GameObject) SetAcceleration(a Vector2) {
+func (g *gameObject) SetAcceleration(a Vector2) {
 	g.Acceleration = a
 }
 
-func (g *GameObject) GetBaseSpeed() float64 {
+func (g *gameObject) GetBaseSpeed() float64 {
 	return g.BaseSpeed
 }
 
-func (g *GameObject) SetBaseSpeed(s float64) {
+func (g *gameObject) SetBaseSpeed(s float64) {
 	g.BaseSpeed = s
 }
 
-func (g *GameObject) GetMass() float64 {
+func (g *gameObject) GetMass() float64 {
 	return g.Mass
 }
 
-func (g *GameObject) ApplyFriction(dt float64) {
+func (g *gameObject) ApplyFriction(dt float64) {
 	g.Velocity = g.Velocity.MulScalar(1 - g.Friction*dt)
 }
 
-func (g *GameObject) GetChildren() []DynamicObject {
-	return g.ChildObjects
+func (g *gameObject) GetChildren() []DynamicObject {
+	return g.childObjects
 }
 
-func (g *GameObject) SetChildren(children []DynamicObject) {
-	g.ChildObjects = children
+func (g *gameObject) SetChildren(children []DynamicObject) {
+	g.childObjects = children
 }
 
-func (g *GameObject) AddChild(child DynamicObject) {
-	g.ChildObjects = append(g.ChildObjects, child)
+func (g *gameObject) AddChild(child DynamicObject) {
+	child.SetRootParent(g.GetRootParent())
+	child.SetParent(g)
+	g.childObjects = append(g.childObjects, child)
 }
 
-func (g *GameObject) SetParent(parent DynamicObject) {
-	g.ParentObject = parent
+func (g *gameObject) SetRootParent(parent DynamicObject) {
+	g.rootParent = parent
 }
 
-func (g *GameObject) GetAppliedForce() Vector2 {
-	return g.AppliedForce
+func (g *gameObject) GetRootParent() DynamicObject {
+	return g.rootParent
 }
 
-func (g *GameObject) AddForce(force Vector2) {
-	g.AppliedForce = g.AppliedForce.Add(force)
+func (g *gameObject) SetParent(parent DynamicObject) {
+	g.parentObject = parent
+	g.rootParent = parent.GetRootParent()
 }
 
-func (g *GameObject) GetParent() DynamicObject {
-	return g.ParentObject
+func (g *gameObject) GetAppliedForce() Vector2 {
+	return g.appliedForce
 }
 
-func (g *GameObject) IsAlive() bool {
+func (g *gameObject) AddForce(force Vector2) {
+	g.appliedForce = g.appliedForce.Add(force)
+}
+
+func (g *gameObject) GetParent() DynamicObject {
+	return g.parentObject
+}
+
+func (g *gameObject) IsAlive() bool {
 	if g.Until.IsZero() {
 		return true
 	}
 	return time.Now().Before(g.Until)
 }
 
-func (g *GameObject) RemoveChild(child DynamicObject) {
-	for i, c := range g.ChildObjects {
+func (g *gameObject) RemoveChild(child DynamicObject) {
+	for i, c := range g.childObjects {
 		if c == child {
-			g.ChildObjects = append(g.ChildObjects[:i], g.ChildObjects[i+1:]...)
+			g.childObjects = append(g.childObjects[:i], g.childObjects[i+1:]...)
 			return
 		}
 	}
 }
 
-func (g *GameObject) RemoveParent() {
-	g.ParentObject = nil
-}
-
-func (g *GameObject) GetHit() {
-	if time.Now().After(g.HitCooldown) {
-		fmt.Println("Hit!")
-		g.HitCooldown = time.Now().Add(1000 * time.Millisecond)
-	}
+func (g *gameObject) RemoveParent() {
+	g.parentObject = nil
 }

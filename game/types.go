@@ -25,7 +25,7 @@ func ObjectType(object engine.Object) ObjType {
 		return Wall
 	case *meleeObject:
 		return Melee
-	case *fart:
+	case *fartObject:
 		return Fart
 	default:
 		fmt.Printf("could not infer game object type, received: %T", object)
