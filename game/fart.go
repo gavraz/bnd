@@ -9,6 +9,7 @@ type fartObject struct {
 	engine.DynamicObject
 	hasCollided      bool
 	disableCollision bool
+	deltaTime        float64
 }
 
 func newFartObject(player engine.DynamicObject, width, height float64) *fartObject {
@@ -24,11 +25,11 @@ func newFartObject(player engine.DynamicObject, width, height float64) *fartObje
 	}
 }
 
-func (f *fartObject) OnCollision(collider engine.Object, dt float64) {
+func (f *fartObject) OnCollision(collider engine.Object) {
 	if f.disableCollision {
 		return
 	}
-	pushVector := collider.GetCenter().Sub(f.GetCenter()).Normalize().DivScalar(dt)
+	pushVector := collider.GetCenter().Sub(f.GetCenter()).Normalize().DivScalar(f.deltaTime)
 	if u, ok := collider.(engine.DynamicObject); ok {
 		u.AddForce(pushVector)
 	}
@@ -36,6 +37,7 @@ func (f *fartObject) OnCollision(collider engine.Object, dt float64) {
 }
 
 func (f *fartObject) Update(dt float64) {
+	f.deltaTime = dt
 	if f.hasCollided {
 		f.disableCollision = true
 	}

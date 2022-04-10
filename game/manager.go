@@ -27,7 +27,7 @@ func (m *Manager) InitGame() {
 				X: 0,
 				Y: 0,
 			},
-			BaseSpeed:     2,
+			BaseSpeed:     3,
 			CollisionType: engine.Circle,
 			Width:         0.05,
 			Height:        0.05,
@@ -49,7 +49,6 @@ func (m *Manager) InitGame() {
 			Width:         0.2,
 			Height:        0.2,
 			Mass:          1,
-			Direction:     engine.Vector2{Y: 1},
 			Friction:      4.0,
 		}),
 		hp: 100,
@@ -145,7 +144,7 @@ func (m *Manager) clearGameData() {
 	m.env.ClearGameData()
 }
 
-func (m *Manager) Fart(dt float64) {
+func (m *Manager) Fart() {
 	player := m.env.ObjectByName("current-player").(*player)
 	fart := newFartObject(player, 0.5, 0.5)
 	player.AddChild(fart)

@@ -35,10 +35,10 @@ func (e *Environment) ForEachGameObject(do func(object Object)) {
 type DynamicObjectCollisionMap map[DynamicObject][]DynamicObject
 type StaticObjectCollisionMap map[DynamicObject][]StaticObject
 
-func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObjectCollisionMap {
+func (e *Environment) GetDynamicCollisions(obj DynamicObject) DynamicObjectCollisionMap {
 	colliders := make(DynamicObjectCollisionMap)
 	for _, child := range obj.GetChildren() {
-		colliders[child] = append(colliders[child], e.ResolveDynamicCollisions(child)[child]...)
+		colliders[child] = append(colliders[child], e.GetDynamicCollisions(child)[child]...)
 	}
 
 	for _, other := range e.dynamicObjects {
@@ -82,46 +82,36 @@ func (e *Environment) ObjectByName(name string) Object {
 
 func (e *Environment) Update(dt float64) {
 	for _, obj := range e.dynamicObjects {
-		if obj.GetParent() != nil {
-			continue
-		}
 		obj.ApplyFriction(dt)
 		obj.Update(dt)
 
-		if colliders := e.ResolveDynamicCollisions(obj); colliders != nil {
-			for collider, collidee := range colliders {
-				for _, c := range collidee {
-					collider.OnCollision(c, dt)
-					fmt.Println("Dynamic Collision detected: ", collider, c)
+		if dynamicCollisions := e.GetDynamicCollisions(obj); dynamicCollisions != nil {
+			for collider, collidees := range dynamicCollisions {
+				for _, collidee := range collidees {
+					collider.OnCollision(collidee)
+					fmt.Println("Dynamic Collision detected: ", collider.GetVelocity(), collidee.GetVelocity())
 				}
 			}
 		}
-		if colliders := e.ResolveStaticCollisions(obj); colliders != nil {
-			for collider, collidee := range colliders {
-				for _, c := range collidee {
-					collider.OnCollision(c, dt)
-					fmt.Println("Static Collision detected: ", collider, c)
+		if staticCollisions := e.ResolveStaticCollisions(obj); staticCollisions != nil {
+			for collider, collidees := range staticCollisions {
+				for _, collidee := range collidees {
+					collider.OnCollision(collidee)
+					fmt.Println("Static Collision detected: ", collider, collidee)
 				}
 			}
 		}
-
 		// TODO: melee collision
 		//Might need to move it into a whole outside function that deals with such object types in the future
 		//do := func(child Object) {
 		//	if ObjectType(child) != Melee {
 		//		return
 		//	}
-		//	if collider := e.ResolveDynamicCollisions(child.(DynamicObject)); collider != nil && collider != child.(DynamicObject).GetParent() && ObjectType(collider) != Melee {
+		//	if collider := e.GetDynamicCollisions(child.(DynamicObject)); collider != nil && collider != child.(DynamicObject).GetParent() && ObjectType(collider) != Melee {
 		//		collider.(DynamicObject).GetHit()
 		//	}
 		//}
 		//obj.ForEachChild(do)
-	}
-	for _, obj := range e.dynamicObjects {
-		if obj.GetParent() != nil {
-			continue
-		}
-		obj.Update(dt)
 	}
 }
 

@@ -51,7 +51,7 @@ type DynamicObject interface {
 	IsAlive() bool
 	SetRootParent(g DynamicObject)
 	GetRootParent() DynamicObject
-	OnCollision(collider Object, dt float64)
+	OnCollision(collider Object)
 }
 
 type GameObjectConf struct {
@@ -137,26 +137,26 @@ func (g *gameObject) ForEachChild(do func(child Object)) {
 	}
 }
 
-func (g *gameObject) OnCollision(collider Object, dt float64) {
+func (g *gameObject) OnCollision(collider Object) {
 	if d, ok := collider.(DynamicObject); ok {
 		if g.CollisionType == Circle && collider.GetCollisionType() == Circle {
-			g.onDynamicCollisionCircles(d, dt)
+			g.onDynamicCollisionCircles(d)
 		} else if g.CollisionType == Rectangle && collider.GetCollisionType() == Rectangle {
-			g.onDynamicCollisionRectangles(d, dt)
+			g.onDynamicCollisionRectangles(d)
 		} else if g.CollisionType == Circle && collider.GetCollisionType() == Rectangle {
-			g.onDynamicCollisionCircleRectangle(d, dt)
+			g.onDynamicCollisionCircleRectangle(d)
 		} else if g.CollisionType == Rectangle && collider.GetCollisionType() == Circle {
-			g.onDynamicCollisionRectangleCircle(d, dt)
+			g.onDynamicCollisionRectangleCircle(d)
 		}
 	} else if s, ok := collider.(StaticObject); ok {
 		if g.CollisionType == Circle && collider.GetCollisionType() == Circle {
-			g.onStaticCollisionCircles(s, dt)
+			g.onStaticCollisionCircles(s)
 		} else if g.CollisionType == Rectangle && collider.GetCollisionType() == Rectangle {
-			g.onStaticCollisionRectangles(s, dt)
+			g.onStaticCollisionRectangles(s)
 		} else if g.CollisionType == Circle && collider.GetCollisionType() == Rectangle {
-			g.onStaticCollisionCircleRectangle(s, dt)
+			g.onStaticCollisionCircleRectangle(s)
 		} else if g.CollisionType == Rectangle && collider.GetCollisionType() == Circle {
-			g.onStaticCollisionRectangleCircle(s, dt)
+			g.onStaticCollisionRectangleCircle(s)
 		}
 	}
 }
