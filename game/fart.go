@@ -7,6 +7,8 @@ import (
 
 type fartObject struct {
 	engine.DynamicObject
+	hasCollided      bool
+	disableCollision bool
 }
 
 func newFartObject(player engine.DynamicObject, width, height float64) *fartObject {
@@ -22,6 +24,19 @@ func newFartObject(player engine.DynamicObject, width, height float64) *fartObje
 	}
 }
 
-func (f *fartObject) Update(dt float64) {
+func (f *fartObject) OnCollision(collider engine.Object, dt float64) {
+	if f.disableCollision {
+		return
+	}
+	pushVector := collider.GetCenter().Sub(f.GetCenter()).Normalize().DivScalar(dt)
+	if u, ok := collider.(engine.DynamicObject); ok {
+		u.AddForce(pushVector)
+	}
+	f.hasCollided = true
+}
 
+func (f *fartObject) Update(dt float64) {
+	if f.hasCollided {
+		f.disableCollision = true
+	}
 }

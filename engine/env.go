@@ -32,64 +32,41 @@ func (e *Environment) ForEachGameObject(do func(object Object)) {
 	}
 }
 
-func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) []DynamicObject {
-	var isChild bool
-	colliders := make([]DynamicObject, 0)
+type DynamicObjectCollisionMap map[DynamicObject][]DynamicObject
+type StaticObjectCollisionMap map[DynamicObject][]StaticObject
+
+func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObjectCollisionMap {
+	colliders := make(DynamicObjectCollisionMap)
+	for _, child := range obj.GetChildren() {
+		colliders[child] = append(colliders[child], e.ResolveDynamicCollisions(child)[child]...)
+	}
+
 	for _, other := range e.dynamicObjects {
-		isChild = false
-		if other == obj {
+		if obj == other || obj.GetRootParent() == other.GetRootParent() {
 			continue
 		}
-		for _, child := range obj.GetChildren() {
-			if Object(other) == child {
-				isChild = true
-				break
-			}
-		}
-		if isChild {
-			continue
-		}
-		for _, child := range other.GetChildren() {
-			if Object(obj) == child {
-				isChild = true
-				break
-			}
-		}
-		if isChild {
-			continue
-		}
-		if collider := CheckDynamicCollision(obj, other); collider != nil {
-			colliders = append(colliders, collider)
+		if e.CollidesWith(obj, other) {
+			colliders[obj] = append(colliders[obj], other)
 		}
 	}
-	if len(colliders) > 0 {
-		return colliders
-	}
-	return nil
+	return colliders
 }
 
-func (e *Environment) ResolveStaticCollisions(obj DynamicObject) []StaticObject {
-	var isChild bool
-	colliders := make([]StaticObject, 0)
+func (e *Environment) ResolveStaticCollisions(obj DynamicObject) StaticObjectCollisionMap {
+	colliders := make(StaticObjectCollisionMap)
+	for _, child := range obj.GetChildren() {
+		colliders[child] = append(colliders[child], e.ResolveStaticCollisions(child)[child]...)
+	}
+
 	for _, other := range e.staticObjects {
-		isChild = false
-		for _, child := range obj.GetChildren() {
-			if Object(other) == child {
-				isChild = true
-				break
-			}
-		}
-		if isChild {
+		if obj == other {
 			continue
 		}
-		if collider := CheckStaticCollision(obj, other); collider != nil {
-			colliders = append(colliders, collider)
+		if e.CollidesWith(obj, other) {
+			colliders[obj] = append(colliders[obj], other)
 		}
 	}
-	if len(colliders) > 0 {
-		return colliders
-	}
-	return nil
+	return colliders
 }
 
 func (e *Environment) ObjectByName(name string) Object {
@@ -112,13 +89,19 @@ func (e *Environment) Update(dt float64) {
 		obj.Update(dt)
 
 		if colliders := e.ResolveDynamicCollisions(obj); colliders != nil {
-			for _, collider := range colliders {
-				fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
+			for collider, collidee := range colliders {
+				for _, c := range collidee {
+					collider.OnCollision(c, dt)
+					fmt.Println("Dynamic Collision detected: ", collider, c)
+				}
 			}
 		}
 		if colliders := e.ResolveStaticCollisions(obj); colliders != nil {
-			for _, collider := range colliders {
-				fmt.Println("Dynamic Collision detected: ", obj.GetCenter(), collider.GetCenter())
+			for collider, collidee := range colliders {
+				for _, c := range collidee {
+					collider.OnCollision(c, dt)
+					fmt.Println("Static Collision detected: ", collider, c)
+				}
 			}
 		}
 
@@ -133,6 +116,12 @@ func (e *Environment) Update(dt float64) {
 		//	}
 		//}
 		//obj.ForEachChild(do)
+	}
+	for _, obj := range e.dynamicObjects {
+		if obj.GetParent() != nil {
+			continue
+		}
+		obj.Update(dt)
 	}
 }
 

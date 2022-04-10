@@ -149,7 +149,6 @@ func (m *Manager) Fart(dt float64) {
 	player := m.env.ObjectByName("current-player").(*player)
 	fart := newFartObject(player, 0.5, 0.5)
 	player.AddChild(fart)
-	m.pushAwayObjects(fart, dt)
 }
 
 func (m *Manager) Melee() {
@@ -166,15 +165,6 @@ func (m *Manager) Melee() {
 		IsPassthrough: true,
 	}), user.GetDirection(), user.GetCenter(), user.GetWidth(), math.Pi/4, lifeTime, size, radius)
 	user.AddChild(sword)
-}
-
-func (m *Manager) pushAwayObjects(pusherObject engine.DynamicObject, dt float64) {
-	if colliders := m.env.ResolveDynamicCollisions(pusherObject); colliders != nil {
-		for _, collider := range colliders {
-			pushVector := collider.GetCenter().Sub(pusherObject.GetCenter()).Normalize().DivScalar(dt)
-			collider.AddForce(pushVector)
-		}
-	}
 }
 
 func (m *Manager) Update(dt float64) {
