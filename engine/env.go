@@ -35,10 +35,10 @@ func (e *Environment) ForEachGameObject(do func(object Object)) {
 type DynamicObjectCollisionMap map[DynamicObject][]DynamicObject
 type StaticObjectCollisionMap map[DynamicObject][]StaticObject
 
-func (e *Environment) GetDynamicCollisions(obj DynamicObject) DynamicObjectCollisionMap {
+func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObjectCollisionMap {
 	colliders := make(DynamicObjectCollisionMap)
 	for _, child := range obj.GetChildren() {
-		colliders[child] = append(colliders[child], e.GetDynamicCollisions(child)[child]...)
+		colliders[child] = append(colliders[child], e.ResolveDynamicCollisions(child)[child]...)
 	}
 
 	for _, other := range e.dynamicObjects {
@@ -85,7 +85,7 @@ func (e *Environment) Update(dt float64) {
 		obj.ApplyFriction(dt)
 		obj.Update(dt)
 
-		if dynamicCollisions := e.GetDynamicCollisions(obj); dynamicCollisions != nil {
+		if dynamicCollisions := e.ResolveDynamicCollisions(obj); dynamicCollisions != nil {
 			for collider, collidees := range dynamicCollisions {
 				for _, collidee := range collidees {
 					collider.OnCollision(collidee)
@@ -107,7 +107,7 @@ func (e *Environment) Update(dt float64) {
 		//	if ObjectType(child) != Melee {
 		//		return
 		//	}
-		//	if collider := e.GetDynamicCollisions(child.(DynamicObject)); collider != nil && collider != child.(DynamicObject).GetParent() && ObjectType(collider) != Melee {
+		//	if collider := e.ResolveDynamicCollisions(child.(DynamicObject)); collider != nil && collider != child.(DynamicObject).GetParent() && ObjectType(collider) != Melee {
 		//		collider.(DynamicObject).GetHit()
 		//	}
 		//}
