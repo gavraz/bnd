@@ -106,7 +106,7 @@ func (c *Controller) setDefault() {
 
 type movePlayerFunc func(direction game.Direction)
 
-func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, fart func(dt float64), melee func(), dt float64) {
+func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed func(key Key) bool, pause func(), movePlayer movePlayerFunc, fart func(), melee func()) {
 	var dir game.Direction
 
 	if isPressed(c.actionToKey[playerUp]) {
@@ -125,7 +125,7 @@ func (c *Controller) HandleGameInput(isPressed func(key Key) bool, justPressed f
 		pause()
 	}
 	if justPressed(c.actionToKey[playerAbility]) {
-		fart(dt)
+		fart()
 	}
 	if justPressed(c.actionToKey[playerMelee]) {
 		melee()
