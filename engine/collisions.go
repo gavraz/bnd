@@ -91,48 +91,13 @@ func (g *gameObject) onDynamicCollisionRectangles(collider DynamicObject) {
 }
 func (g *gameObject) onDynamicCollisionCircleRectangle(collider DynamicObject) {
 	circle, rect := g, collider
-	if circle.GetIsPassthrough() || rect.GetIsPassthrough() {
-		return
-	}
-	NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
-	NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
-	dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
-
-	penetrationDepth := circle.GetWidth()/2 - dist.Length()
-	penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
-
-	if penetrationDepth > 0.0 {
-		if circle.GetVelocity().Dot(dist) < 0 {
-			tangentVel := dist.Normalize().Dot(circle.GetVelocity())
-			combinedMass := circle.GetMass() + rect.GetMass()
-			circle.SetVelocity(circle.GetVelocity().Sub(dist.Normalize().MulScalar(tangentVel * rect.GetMass() / combinedMass * 2)))
-			rect.SetVelocity(rect.GetVelocity().Add(dist.Normalize().MulScalar(tangentVel * circle.GetMass() / combinedMass * 2)))
-		}
-		circle.SetCenter(circle.GetCenter().Add(penetrationVector))
-	}
+	handleCircleRectangleCollision(circle, rect)
 }
 func (g *gameObject) onDynamicCollisionRectangleCircle(collider DynamicObject) {
 	rect, circle := g, collider
-	if circle.GetIsPassthrough() || rect.GetIsPassthrough() {
-		return
-	}
-	NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
-	NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
-	dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
-
-	penetrationDepth := circle.GetWidth()/2 - dist.Length()
-	penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
-
-	if penetrationDepth > 0.0 {
-		if circle.GetVelocity().Dot(dist) < 0 {
-			tangentVel := dist.Normalize().Dot(circle.GetVelocity())
-			combinedMass := circle.GetMass() + rect.GetMass()
-			circle.SetVelocity(circle.GetVelocity().Sub(dist.Normalize().MulScalar(tangentVel * rect.GetMass() / combinedMass * 2)))
-			rect.SetVelocity(rect.GetVelocity().Add(dist.Normalize().MulScalar(tangentVel * circle.GetMass() / combinedMass * 2)))
-		}
-		circle.SetCenter(circle.GetCenter().Add(penetrationVector))
-	}
+	handleCircleRectangleCollision(circle, rect)
 }
+
 func (g *gameObject) onStaticCollisionCircles(collider StaticObject) {
 	if g.GetIsPassthrough() {
 		return
@@ -263,5 +228,27 @@ func RectangleCollidesWithRectangle(obj DynamicObject, other Object) bool {
 	} else {
 		// Collision
 		return true
+	}
+}
+
+func handleCircleRectangleCollision(circle DynamicObject, rect DynamicObject) {
+	if circle.GetIsPassthrough() || rect.GetIsPassthrough() {
+		return
+	}
+	NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
+	NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
+	dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
+
+	penetrationDepth := circle.GetWidth()/2 - dist.Length()
+	penetrationVector := dist.Normalize().MulScalar(penetrationDepth)
+
+	if penetrationDepth > 0.0 {
+		if circle.GetVelocity().Dot(dist) < 0 {
+			tangentVel := dist.Normalize().Dot(circle.GetVelocity())
+			combinedMass := circle.GetMass() + rect.GetMass()
+			circle.SetVelocity(circle.GetVelocity().Sub(dist.Normalize().MulScalar(tangentVel * rect.GetMass() / combinedMass * 2)))
+			rect.SetVelocity(rect.GetVelocity().Add(dist.Normalize().MulScalar(tangentVel * circle.GetMass() / combinedMass * 2)))
+		}
+		circle.SetCenter(circle.GetCenter().Add(penetrationVector))
 	}
 }
