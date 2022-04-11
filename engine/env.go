@@ -80,6 +80,10 @@ func (e *Environment) ObjectByName(name string) Object {
 	return nil
 }
 
+type OnCollisioner interface {
+	OnCollision(collider Object)
+}
+
 func (e *Environment) Update(dt float64) {
 	for _, obj := range e.dynamicObjects {
 		obj.ApplyFriction(dt)
@@ -88,7 +92,10 @@ func (e *Environment) Update(dt float64) {
 		if dynamicCollisions := e.ResolveDynamicCollisions(obj); dynamicCollisions != nil {
 			for collider, collidees := range dynamicCollisions {
 				for _, collidee := range collidees {
-					collider.OnCollision(collidee)
+					collider.onCollision(collidee)
+					if c, ok := collider.(OnCollisioner); ok {
+						c.OnCollision(collidee)
+					}
 					fmt.Println("Dynamic Collision detected: ", collider.GetVelocity(), collidee.GetVelocity())
 				}
 			}
@@ -96,7 +103,10 @@ func (e *Environment) Update(dt float64) {
 		if staticCollisions := e.ResolveStaticCollisions(obj); staticCollisions != nil {
 			for collider, collidees := range staticCollisions {
 				for _, collidee := range collidees {
-					collider.OnCollision(collidee)
+					collider.onCollision(collidee)
+					if c, ok := collider.(OnCollisioner); ok {
+						c.OnCollision(collidee)
+					}
 					fmt.Println("Static Collision detected: ", collider, collidee)
 				}
 			}

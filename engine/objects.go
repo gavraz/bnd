@@ -51,7 +51,7 @@ type DynamicObject interface {
 	IsAlive() bool
 	SetRootParent(g DynamicObject)
 	GetRootParent() DynamicObject
-	OnCollision(collider Object)
+	onCollision(collider Object)
 }
 
 type GameObjectConf struct {
@@ -137,7 +137,7 @@ func (g *gameObject) ForEachChild(do func(child Object)) {
 	}
 }
 
-func (g *gameObject) OnCollision(collider Object) {
+func (g *gameObject) onCollision(collider Object) {
 	if d, ok := collider.(DynamicObject); ok {
 		if g.CollisionType == Circle && collider.GetCollisionType() == Circle {
 			g.onDynamicCollisionCircles(d)
