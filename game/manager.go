@@ -35,8 +35,7 @@ func (m *Manager) InitGame() {
 			Direction:     engine.Vector2{Y: 1},
 			Friction:      4.0,
 		}),
-		hp:          100,
-		hitCooldown: time.Now(),
+		hp: 100,
 	})
 
 	m.env.AddDynamicObject("enemy-player", &player{
@@ -152,12 +151,19 @@ func (m *Manager) Fart() {
 }
 
 func (m *Manager) Melee() {
-	user := m.env.ObjectByName("current-player").(*player)
-	angle := math.Pi / 4
-	lifeTime := 150 * time.Millisecond
-	size := 0.01
+	lifeTime := 0.15
 	radius := 0.1
-	newMeleeObject(user, angle, lifeTime, size, radius)
+	size := 0.01
+	user := m.env.ObjectByName("current-player").(*player)
+	sword := newMeleeObject(engine.NewDynamicObject(engine.GameObjectConf{
+		CollisionType: engine.Circle,
+		Width:         size,
+		Height:        size,
+		Mass:          1,
+		Until:         time.Now().Add(time.Duration(lifeTime*1000) * time.Millisecond),
+		IsPassthrough: true,
+	}), user.GetDirection(), user.GetCenter(), user.GetWidth(), math.Pi/4, lifeTime, size, radius)
+	user.AddChild(sword)
 }
 
 func (m *Manager) Update(dt float64) {

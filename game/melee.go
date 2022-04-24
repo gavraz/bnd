@@ -2,7 +2,6 @@ package game
 
 import (
 	"bnd/engine"
-	"fmt"
 	"time"
 )
 
@@ -10,57 +9,34 @@ type meleeObject struct {
 	engine.DynamicObject
 	angle    float64
 	curAngle float64
-	lifeTime time.Duration
+	lifeTime float64
 	radius   float64
 }
 
-func newMeleeObject(user *player, angle float64, lifeTime time.Duration, size float64, radius float64) {
-	userDir, userCenter, userSize := user.GetDirection(), user.GetCenter(), user.GetWidth()
-	sword := &meleeObject{
-		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
+func newMeleeObject(obj engine.DynamicObject, userDir engine.Vector2, userCenter engine.Vector2, userSize float64, angle float64, lifeTime float64, size float64, radius float64) *meleeObject {
+	dir := userDir.Rotate(angle)
+	obj.SetDirection(dir)
+	centerMain := userCenter.Add(dir.MulScalar(userSize))
+	obj.SetCenter(centerMain)
+	childNumber := 100 * radius
+	for i := 1.0; i <= childNumber; i++ {
+		sword := &meleeObject{engine.NewDynamicObject(engine.GameObjectConf{
+			Center:        centerMain.Add(dir.MulScalar(i * radius / childNumber)),
 			CollisionType: engine.Circle,
 			Width:         size,
 			Height:        size,
 			Mass:          1,
-			Until:         time.Now().Add(lifeTime),
+			Direction:     dir,
+			Until:         time.Now().Add(time.Duration(lifeTime*1000) * time.Millisecond),
 			IsPassthrough: true,
-		}),
-		angle:    angle,
-		curAngle: angle,
-		lifeTime: lifeTime,
-		radius:   radius,
+		}), 0, 0, 1, 1}
+		obj.AddChild(sword)
 	}
-	sword.SetRootParent(user)
-	user.AddChild(sword)
-	angledDirection := userDir.Rotate(angle)
-	sword.SetDirection(angledDirection)
-	centerMain := userCenter.Add(angledDirection.MulScalar(userSize))
-	sword.SetCenter(centerMain)
-	childNumber := 100.0
-	for i := 1.0; i <= childNumber*radius; i++ {
-		swordParticle := &meleeObject{
-			DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
-				Center:        centerMain.Add(angledDirection.MulScalar(i / childNumber)),
-				CollisionType: engine.Circle,
-				Width:         size,
-				Height:        size,
-				Mass:          1,
-				Direction:     angledDirection,
-				Until:         time.Now().Add(lifeTime),
-				IsPassthrough: true,
-			}),
-			angle:    angle,
-			curAngle: angle,
-			lifeTime: lifeTime,
-			radius:   radius,
-		}
-		swordParticle.SetRootParent(sword)
-		sword.AddChild(swordParticle)
-	}
+	return &meleeObject{obj, angle, angle, lifeTime, radius}
 }
 
 func (m *meleeObject) Update(dt float64) {
-	m.curAngle -= 2 * m.angle * dt / m.lifeTime.Seconds()
+	m.curAngle -= 2 * m.angle * dt / m.lifeTime
 	parent := m.GetParent()
 	center := parent.GetCenter().Add(m.GetDirection().MulScalar(parent.GetWidth()))
 	dir := parent.GetDirection().Rotate(m.curAngle)
@@ -71,15 +47,5 @@ func (m *meleeObject) Update(dt float64) {
 	for i, child := range children {
 		child.SetCenter(center.Add(dir.MulScalar(float64(i+1) * m.radius / size)))
 		child.SetDirection(dir)
-	}
-}
-
-func (m *meleeObject) OnCollision(collider engine.Object) {
-	if p, ok := collider.(*player); ok {
-		if time.Now().After(p.hitCooldown) {
-			p.hp -= 1
-			fmt.Println("Hit! \nCurrent hp: ", p.hp)
-			p.hitCooldown = time.Now().Add(1000 * time.Millisecond)
-		}
 	}
 }

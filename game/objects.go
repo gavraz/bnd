@@ -1,14 +1,10 @@
 package game
 
-import (
-	"bnd/engine"
-	"time"
-)
+import "bnd/engine"
 
 type player struct {
 	engine.DynamicObject
-	hitCooldown time.Time
-	hp          int
+	hp int
 }
 
 type crate struct {
