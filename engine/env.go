@@ -39,7 +39,6 @@ type StaticObjectCollisionMap map[DynamicObject][]StaticObject
 
 func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObjectCollisionMap {
 	colliders := make(DynamicObjectCollisionMap)
-	rootParent := obj.GetRootParent()
 	for _, child := range obj.GetChildren() {
 		childColliders := e.ResolveDynamicCollisions(child)
 		for childObj, colliderList := range childColliders {
@@ -47,7 +46,7 @@ func (e *Environment) ResolveDynamicCollisions(obj DynamicObject) DynamicObjectC
 		}
 	}
 	for _, other := range e.dynamicObjects {
-		if rootParent == other.GetRootParent() {
+		if obj.GetRootParent() == other.GetRootParent() {
 			continue
 		}
 		if e.CollidesWith(obj, other) {

@@ -2,7 +2,6 @@ package game
 
 import (
 	"bnd/engine"
-	"math"
 	"time"
 )
 
@@ -153,11 +152,7 @@ func (m *Manager) Fart() {
 
 func (m *Manager) Melee() {
 	user := m.env.ObjectByName("current-player").(*player)
-	angle := math.Pi / 4
-	lifeTime := 150 * time.Millisecond
-	size := 0.01
-	radius := 0.1
-	newMeleeObject(user, angle, lifeTime, size, radius)
+	addMeleeObject(user)
 }
 
 func (m *Manager) Update(dt float64) {

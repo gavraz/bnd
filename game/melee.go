@@ -3,7 +3,16 @@ package game
 import (
 	"bnd/engine"
 	"fmt"
+	"math"
 	"time"
+)
+
+const (
+	angle               = math.Pi / 4
+	lifeTime            = 150 * time.Millisecond
+	size                = 0.01
+	radius              = 0.1
+	numOfChildParticles = 100.0
 )
 
 type meleeObject struct {
@@ -14,7 +23,7 @@ type meleeObject struct {
 	radius   float64
 }
 
-func newMeleeObject(user *player, angle float64, lifeTime time.Duration, size float64, radius float64) {
+func addMeleeObject(user *player) {
 	userDir, userCenter, userSize := user.GetDirection(), user.GetCenter(), user.GetWidth()
 	sword := &meleeObject{
 		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
@@ -30,17 +39,15 @@ func newMeleeObject(user *player, angle float64, lifeTime time.Duration, size fl
 		lifeTime: lifeTime,
 		radius:   radius,
 	}
-	sword.SetRootParent(user)
 	user.AddChild(sword)
 	angledDirection := userDir.Rotate(angle)
 	sword.SetDirection(angledDirection)
 	centerMain := userCenter.Add(angledDirection.MulScalar(userSize))
 	sword.SetCenter(centerMain)
-	childNumber := 100.0
-	for i := 1.0; i <= childNumber*radius; i++ {
+	for i := 1.0; i <= numOfChildParticles*radius; i++ {
 		swordParticle := &meleeObject{
 			DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
-				Center:        centerMain.Add(angledDirection.MulScalar(i / childNumber)),
+				Center:        centerMain.Add(angledDirection.MulScalar(i / numOfChildParticles)),
 				CollisionType: engine.Circle,
 				Width:         size,
 				Height:        size,
@@ -54,7 +61,6 @@ func newMeleeObject(user *player, angle float64, lifeTime time.Duration, size fl
 			lifeTime: lifeTime,
 			radius:   radius,
 		}
-		swordParticle.SetRootParent(sword)
 		sword.AddChild(swordParticle)
 	}
 }
