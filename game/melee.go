@@ -2,7 +2,6 @@ package game
 
 import (
 	"bnd/engine"
-	"fmt"
 	"math"
 	"time"
 )
@@ -82,10 +81,6 @@ func (m *meleeObject) Update(dt float64) {
 
 func (m *meleeObject) OnCollision(collider engine.Object) {
 	if p, ok := collider.(*player); ok {
-		if time.Now().After(p.hitCooldown) {
-			p.hp -= 1
-			fmt.Println("Hit! \nCurrent hp: ", p.hp)
-			p.hitCooldown = time.Now().Add(1000 * time.Millisecond)
-		}
+		p.getHit(1)
 	}
 }
