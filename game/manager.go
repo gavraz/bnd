@@ -2,7 +2,6 @@ package game
 
 import (
 	"bnd/engine"
-	"time"
 )
 
 type Manager struct {
@@ -34,8 +33,7 @@ func (m *Manager) InitGame() {
 			Direction:     engine.Vector2{Y: 1},
 			Friction:      4.0,
 		}),
-		hp:          100,
-		hitCooldown: time.Now(),
+		hp: 100,
 	})
 
 	m.env.AddDynamicObject("enemy-player", &player{
@@ -151,8 +149,8 @@ func (m *Manager) Fart() {
 }
 
 func (m *Manager) Melee() {
-	user := m.env.ObjectByName("current-player").(*player)
-	addMeleeObject(user)
+	player := m.env.ObjectByName("current-player").(*player)
+	addMeleeObject(player)
 }
 
 func (m *Manager) Update(dt float64) {

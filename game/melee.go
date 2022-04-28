@@ -14,17 +14,23 @@ const (
 	numOfChildParticles = 100.0
 )
 
+type meleeParticle struct {
+	engine.DynamicObject
+	parent *meleeObject
+}
+
 type meleeObject struct {
 	engine.DynamicObject
 	angle    float64
 	curAngle float64
 	lifeTime time.Duration
 	radius   float64
+	collided bool
 }
 
-func addMeleeObject(user *player) {
-	userDir, userCenter, userSize := user.GetDirection(), user.GetCenter(), user.GetWidth()
-	sword := &meleeObject{
+func addMeleeObject(player *player) {
+	userDir, userCenter, userSize := player.GetDirection(), player.GetCenter(), player.GetWidth()
+	meleeObj := &meleeObject{
 		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
 			CollisionType: engine.Circle,
 			Width:         size,
@@ -38,15 +44,15 @@ func addMeleeObject(user *player) {
 		lifeTime: lifeTime,
 		radius:   radius,
 	}
-	user.AddChild(sword)
+	player.AddChild(meleeObj)
 	angledDirection := userDir.Rotate(angle)
-	sword.SetDirection(angledDirection)
+	meleeObj.SetDirection(angledDirection)
 	centerMain := userCenter.Add(angledDirection.MulScalar(userSize))
-	sword.SetCenter(centerMain)
-	for i := 1.0; i <= numOfChildParticles*radius; i++ {
-		swordParticle := &meleeObject{
+	meleeObj.SetCenter(centerMain)
+	for i := 0; i < numOfChildParticles; i++ {
+		particleObj := &meleeParticle{
 			DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
-				Center:        centerMain.Add(angledDirection.MulScalar(i / numOfChildParticles)),
+				Center:        centerMain.Add(angledDirection.MulScalar(float64(i) * radius / numOfChildParticles)),
 				CollisionType: engine.Circle,
 				Width:         size,
 				Height:        size,
@@ -55,12 +61,9 @@ func addMeleeObject(user *player) {
 				Until:         time.Now().Add(lifeTime),
 				IsPassthrough: true,
 			}),
-			angle:    angle,
-			curAngle: angle,
-			lifeTime: lifeTime,
-			radius:   radius,
+			parent: meleeObj,
 		}
-		sword.AddChild(swordParticle)
+		meleeObj.AddChild(particleObj)
 	}
 }
 
@@ -72,15 +75,17 @@ func (m *meleeObject) Update(dt float64) {
 	m.SetDirection(dir)
 	m.SetCenter(center)
 	children := m.GetChildren()
-	size := float64(len(children))
 	for i, child := range children {
-		child.SetCenter(center.Add(dir.MulScalar(float64(i+1) * m.radius / size)))
+		child.SetCenter(center.Add(dir.MulScalar(float64(i) * m.radius / numOfChildParticles)))
 		child.SetDirection(dir)
 	}
 }
 
-func (m *meleeObject) OnCollision(collider engine.Object) {
+func (mp *meleeParticle) OnCollision(collider engine.Object) {
 	if p, ok := collider.(*player); ok {
-		p.getHit(1)
+		if !mp.parent.collided {
+			mp.parent.collided = true
+			p.applyDamage(1)
+		}
 	}
 }
