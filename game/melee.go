@@ -29,7 +29,7 @@ type meleeObject struct {
 }
 
 func addMeleeObject(player *player) {
-	userDir, userCenter, userSize := player.GetDirection(), player.GetCenter(), player.GetWidth()
+	playerDir, playerCenter, playerSize := player.GetDirection(), player.GetCenter(), player.GetWidth()
 	meleeObj := &meleeObject{
 		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
 			CollisionType: engine.Circle,
@@ -45,9 +45,9 @@ func addMeleeObject(player *player) {
 		radius:   radius,
 	}
 	player.AddChild(meleeObj)
-	angledDirection := userDir.Rotate(angle)
+	angledDirection := playerDir.Rotate(angle)
 	meleeObj.SetDirection(angledDirection)
-	centerMain := userCenter.Add(angledDirection.MulScalar(userSize))
+	centerMain := playerCenter.Add(angledDirection.MulScalar(playerSize))
 	meleeObj.SetCenter(centerMain)
 	for i := 0; i < numOfChildParticles; i++ {
 		particleObj := &meleeParticle{
