@@ -2,8 +2,6 @@ package game
 
 import (
 	"bnd/engine"
-	"math"
-	"time"
 )
 
 type Manager struct {
@@ -151,19 +149,8 @@ func (m *Manager) Fart() {
 }
 
 func (m *Manager) Melee() {
-	lifeTime := 0.15
-	radius := 0.1
-	size := 0.01
-	user := m.env.ObjectByName("current-player").(*player)
-	sword := newMeleeObject(engine.NewDynamicObject(engine.GameObjectConf{
-		CollisionType: engine.Circle,
-		Width:         size,
-		Height:        size,
-		Mass:          1,
-		Until:         time.Now().Add(time.Duration(lifeTime*1000) * time.Millisecond),
-		IsPassthrough: true,
-	}), user.GetDirection(), user.GetCenter(), user.GetWidth(), math.Pi/4, lifeTime, size, radius)
-	user.AddChild(sword)
+	player := m.env.ObjectByName("current-player").(*player)
+	addMeleeObject(player)
 }
 
 func (m *Manager) Update(dt float64) {

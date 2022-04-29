@@ -240,7 +240,6 @@ func (g *gameObject) GetRootParent() DynamicObject {
 
 func (g *gameObject) SetParent(parent DynamicObject) {
 	g.parentObject = parent
-	g.rootParent = parent.GetRootParent()
 }
 
 func (g *gameObject) GetAppliedForce() Vector2 {

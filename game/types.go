@@ -23,12 +23,12 @@ func ObjectType(object engine.Object) ObjType {
 		return Crate
 	case *wall:
 		return Wall
-	case *meleeObject:
+	case *meleeObject, *meleeParticle:
 		return Melee
 	case *fartObject:
 		return Fart
 	default:
-		fmt.Printf("could not infer game object type, received: %T", object)
+		fmt.Printf("could not infer game object type, received: %T\n", object)
 		panic("unknown object type ")
 	}
 }
