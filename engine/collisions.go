@@ -154,6 +154,9 @@ func (g *gameObject) onStaticCollisionCircleRectangle(collider StaticObject) {
 	if g.GetIsPassthrough() {
 		return
 	}
+	if collider.GetIsPassthrough() {
+		return
+	}
 	NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))
 	NearestY := math.Max(rect.GetCenter().Y-rect.GetHeight()/2, math.Min(circle.GetCenter().Y, rect.GetCenter().Y+rect.GetHeight()/2))
 	dist := Vector2{X: circle.GetCenter().X - NearestX, Y: circle.GetCenter().Y - NearestY}
@@ -171,6 +174,9 @@ func (g *gameObject) onStaticCollisionCircleRectangle(collider StaticObject) {
 func (g *gameObject) onStaticCollisionRectangleCircle(collider StaticObject) {
 	rect, circle := g, collider
 	if g.GetIsPassthrough() {
+		return
+	}
+	if collider.GetIsPassthrough() {
 		return
 	}
 	NearestX := math.Max(rect.GetCenter().X-rect.GetWidth()/2, math.Min(circle.GetCenter().X, rect.GetCenter().X+rect.GetWidth()/2))

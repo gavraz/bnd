@@ -13,10 +13,12 @@ const (
 
 type Object interface {
 	GetCollisionType() CollisionTypes
+	GetIsPassthrough() bool
 	GetCenter() Vector2
 	SetCenter(p Vector2)
 	GetWidth() float64
 	GetHeight() float64
+	GetName() string
 }
 
 type StaticObject interface {
@@ -25,7 +27,6 @@ type StaticObject interface {
 
 type DynamicObject interface {
 	Object
-	GetIsPassthrough() bool
 	GetVelocity() Vector2
 	SetVelocity(v Vector2)
 	GetAcceleration() Vector2
@@ -55,6 +56,7 @@ type DynamicObject interface {
 }
 
 type GameObjectConf struct {
+	Name          string
 	CollisionType CollisionTypes
 	Width         float64
 	Height        float64
@@ -88,6 +90,10 @@ func NewDynamicObject(conf GameObjectConf) DynamicObject {
 func NewStaticObject(conf GameObjectConf) StaticObject {
 	obj := &gameObject{GameObjectConf: conf}
 	return obj
+}
+
+func (g *gameObject) GetName() string {
+	return g.Name
 }
 
 func (g *gameObject) GetIsPassthrough() bool {
