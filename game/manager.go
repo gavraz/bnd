@@ -2,6 +2,7 @@ package game
 
 import (
 	"bnd/engine"
+	"math/rand"
 )
 
 type Manager struct {
@@ -18,9 +19,18 @@ func (m *Manager) HP() int {
 	return m.env.ObjectByName("current-player").(*player).hp
 }
 
+func (m *Manager) removeDynamicObject(object engine.DynamicObject) {
+	m.env.RemoveDynamicObject(object)
+}
+
+func (m *Manager) removeStaticObject(object engine.StaticObject) {
+	m.env.RemoveStaticObject(object)
+}
+
 func (m *Manager) InitGame() {
-	m.env.AddDynamicObject("current-player", &player{
+	m.env.AddDynamicObject(&player{
 		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
+			Name: "current-player",
 			Center: engine.Vector2{
 				X: 0,
 				Y: 0,
@@ -36,8 +46,9 @@ func (m *Manager) InitGame() {
 		hp: 100,
 	})
 
-	m.env.AddDynamicObject("enemy-player", &player{
+	m.env.AddDynamicObject(&player{
 		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
+			Name: "enemy-player",
 			Center: engine.Vector2{
 				X: 0.2,
 				Y: 0.3,
@@ -51,36 +62,24 @@ func (m *Manager) InitGame() {
 		}),
 		hp: 100,
 	})
+	for i := 0; i < 10; i++ {
+		crateName := "Crate" + string(i)
+		pos := engine.Vector2{rand.Float64()*1.8 - 0.9, rand.Float64()*1.5 - 0.6}
+		crateSize := 0.05
+		m.env.AddStaticObject(&crate{
+			StaticObject: engine.NewStaticObject(engine.GameObjectConf{
+				Name:          crateName,
+				Center:        pos,
+				Width:         crateSize,
+				Height:        crateSize,
+				IsPassthrough: true,
+			}),
+			removeCrate: m.removeStaticObject})
+	}
 
-	m.env.AddDynamicObject("crate", &crate{
-		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
-			Center: engine.Vector2{
-				X: -0.2,
-				Y: -0.2,
-			},
-			CollisionType: engine.Rectangle,
-			Width:         0.1,
-			Height:        0.1,
-			Mass:          1,
-			Friction:      4.0,
-		}),
-	})
-	m.env.AddDynamicObject("crate2", &crate{
-		DynamicObject: engine.NewDynamicObject(engine.GameObjectConf{
-			Center: engine.Vector2{
-				X: -0.6,
-				Y: -0.5,
-			},
-			CollisionType: engine.Rectangle,
-			Width:         0.2,
-			Height:        0.2,
-			Mass:          2,
-			Friction:      4.0,
-		}),
-	})
-
-	m.env.AddStaticObject("wall-bottom", &wall{
+	m.env.AddStaticObject(&wall{
 		StaticObject: engine.NewStaticObject(engine.GameObjectConf{
+			Name: "wall-bottom",
 			Center: engine.Vector2{
 				X: 0,
 				Y: -0.83,
@@ -90,8 +89,9 @@ func (m *Manager) InitGame() {
 			Height:        0.34,
 		}),
 	})
-	m.env.AddStaticObject("wall-left", &wall{
+	m.env.AddStaticObject(&wall{
 		StaticObject: engine.NewStaticObject(engine.GameObjectConf{
+			Name: "wall-left",
 			Center: engine.Vector2{
 				X: -0.98,
 				Y: 0,
@@ -101,8 +101,9 @@ func (m *Manager) InitGame() {
 			Height:        2,
 		}),
 	})
-	m.env.AddStaticObject("wall-right", &wall{
+	m.env.AddStaticObject(&wall{
 		StaticObject: engine.NewStaticObject(engine.GameObjectConf{
+			Name: "wall-right",
 			Center: engine.Vector2{
 				X: 0.98,
 				Y: 0,
@@ -112,8 +113,9 @@ func (m *Manager) InitGame() {
 			Height:        2,
 		}),
 	})
-	m.env.AddStaticObject("wall-top", &wall{
+	m.env.AddStaticObject(&wall{
 		StaticObject: engine.NewStaticObject(engine.GameObjectConf{
+			Name: "wall-top",
 			Center: engine.Vector2{
 				X: 0,
 				Y: 0.98,

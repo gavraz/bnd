@@ -1,9 +1,5 @@
 package engine
 
-import (
-	"fmt"
-)
-
 type Environment struct {
 	dynamicObjects map[string]DynamicObject
 	staticObjects  map[string]StaticObject
@@ -16,12 +12,20 @@ func NewEnvironment() *Environment {
 	}
 }
 
-func (e *Environment) AddDynamicObject(name string, object DynamicObject) {
-	e.dynamicObjects[name] = object
+func (e *Environment) AddDynamicObject(object DynamicObject) {
+	e.dynamicObjects[object.GetName()] = object
 }
 
-func (e *Environment) AddStaticObject(name string, object StaticObject) {
-	e.staticObjects[name] = object
+func (e *Environment) RemoveDynamicObject(object DynamicObject) {
+	delete(e.dynamicObjects, object.GetName())
+}
+
+func (e *Environment) AddStaticObject(object StaticObject) {
+	e.staticObjects[object.GetName()] = object
+}
+
+func (e *Environment) RemoveStaticObject(object StaticObject) {
+	delete(e.staticObjects, object.GetName())
 }
 
 func (e *Environment) ForEachGameObject(do func(object Object)) {
@@ -113,7 +117,7 @@ func (e *Environment) Update(dt float64) {
 					if c, ok := collider.(OnCollisioner); ok {
 						c.OnCollision(collidee)
 					}
-					fmt.Println("Static Collision detected: ", collider, collidee)
+					//fmt.Println("Static Collision detected: ", collider, collidee)
 				}
 			}
 		}
