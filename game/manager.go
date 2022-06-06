@@ -2,6 +2,7 @@ package game
 
 import (
 	"bnd/engine"
+	"math/rand"
 )
 
 type Manager struct {
@@ -62,7 +63,18 @@ func (m *Manager) InitGame() {
 		hp: 100,
 	})
 	for i := 0; i < 10; i++ {
-		m.env.AddStaticObject(spawnCreate("Crate"+string(i), m.removeStaticObject))
+		crateName := "Crate" + string(i)
+		pos := engine.Vector2{rand.Float64()*1.8 - 0.9, rand.Float64()*1.5 - 0.6}
+		crateSize := 0.05
+		m.env.AddStaticObject(&crate{
+			StaticObject: engine.NewStaticObject(engine.GameObjectConf{
+				Name:          crateName,
+				Center:        pos,
+				Width:         crateSize,
+				Height:        crateSize,
+				IsPassthrough: true,
+			}),
+			removeCrate: m.removeStaticObject})
 	}
 
 	m.env.AddStaticObject(&wall{
